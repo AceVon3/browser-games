@@ -2,19 +2,60 @@
 Cover2Sports Betting Analytics — Web Server
 
 Usage:
-    pip install flask
+    pip install flask werkzeug
     python server.py
-    Open http://localhost:5000
+    Open http://localhost:5001
 """
 
 import os
 import sys
+import json
+import secrets
 from datetime import date
-from flask import Flask, request, jsonify
+from functools import wraps
+from flask import Flask, request, jsonify, redirect, url_for, session
+from werkzeug.security import generate_password_hash, check_password_hash
 
 sys.path.insert(0, os.path.dirname(__file__))
 
+CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.json')
+
+
+def load_config():
+    if not os.path.exists(CONFIG_PATH):
+        return None
+    with open(CONFIG_PATH) as f:
+        return json.load(f)
+
+
+def save_config(cfg):
+    with open(CONFIG_PATH, 'w') as f:
+        json.dump(cfg, f, indent=2)
+
+
 app = Flask(__name__)
+app.secret_key = secrets.token_hex(32)  # temporary until config loads
+
+
+@app.before_request
+def before_each_request():
+    # Load stable key from config so sessions survive server restarts
+    cfg = load_config()
+    if cfg and cfg.get('secret_key'):
+        app.secret_key = cfg['secret_key']
+    # Redirect to first-time setup when no config exists
+    if request.endpoint not in ('setup', 'login', 'logout', 'static') and cfg is None:
+        return redirect(url_for('setup'))
+
+
+def login_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not session.get('logged_in'):
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated
+
 
 DASHBOARD_HTML = r"""<!DOCTYPE html>
 <html lang="en">
@@ -41,8 +82,31 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
   body { background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; min-height: 100vh; }
   header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; }
   header h1 { font-size: 1.3rem; font-weight: 700; color: var(--accent); }
+  .header-right { display: flex; align-items: center; gap: 16px; }
   header span { color: var(--muted); font-size: 0.85rem; }
+  .sign-out-link { color: var(--muted); font-size: 0.85rem; text-decoration: none; }
+  .sign-out-link:hover { color: var(--text); }
   .main { padding: 24px 32px; max-width: 1400px; margin: 0 auto; }
+
+  /* Tabs */
+  .tab-nav { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 24px; }
+  .tab-btn { background: none; border: none; border-bottom: 2px solid transparent; margin-bottom: -2px; padding: 10px 22px; font-size: 0.9rem; font-weight: 600; color: var(--muted); cursor: pointer; transition: color 0.15s, border-color 0.15s; }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* Profile tab */
+  .profile-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; }
+  .profile-card h2 { font-size: 1rem; color: var(--text); margin-bottom: 20px; }
+  .profile-section { margin-bottom: 28px; }
+  .profile-section h3 { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  .profile-body { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; }
+  .profile-body .field { display: flex; flex-direction: column; gap: 6px; }
+  .profile-body .field label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+  .profile-body input[type="text"],
+  .profile-body input[type="password"] { background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 8px 12px; font-size: 0.875rem; width: 240px; }
+  .profile-body input:focus { outline: 1px solid var(--accent); }
+  .profile-badge { color: var(--green); font-size: 0.82rem; font-weight: 600; }
+  .profile-status { font-size: 0.83rem; color: var(--muted); }
 
   /* Credentials */
   .creds-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 24px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; }
@@ -121,19 +185,68 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
 <body>
 <header>
   <h1>Cover2Sports Dashboard</h1>
-  <span id="lastUpdated"></span>
+  <div class="header-right">
+    <span id="lastUpdated"></span>
+    <a href="/logout" class="sign-out-link">Sign out</a>
+  </div>
 </header>
 
 <div class="main">
-  <!-- Credentials -->
-  <div class="creds-card">
-    <div class="field">
-      <label>Username</label>
-      <input type="text" id="username" placeholder="Cover2Sports username" autocomplete="username">
+  <!-- Tab navigation -->
+  <div class="tab-nav">
+    <button class="tab-btn active" id="tabBtnDashboard" onclick="switchTab('dashboard')">Dashboard</button>
+    <button class="tab-btn" id="tabBtnProfile" onclick="switchTab('profile')">Profile &amp; Settings <span id="profileSavedBadge" class="profile-badge"></span></button>
+  </div>
+
+  <!-- Profile tab -->
+  <div id="tab-profile" class="tab-panel" style="display:none">
+    <div class="profile-card">
+      <div class="profile-section">
+        <h3>Cover2Sports Credentials</h3>
+        <div class="profile-body">
+          <div class="field">
+            <label>Username</label>
+            <input type="text" id="profileC2SUser" placeholder="Cover2Sports username" autocomplete="off">
+          </div>
+          <div class="field">
+            <label>Password</label>
+            <input type="password" id="profileC2SPass" placeholder="Cover2Sports password" autocomplete="off">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;justify-content:flex-end;">
+            <button class="btn-primary" onclick="saveProfile()">Save Credentials</button>
+            <span id="profileStatus" class="profile-status"></span>
+          </div>
+        </div>
+      </div>
+      <div class="profile-section">
+        <h3>Change Dashboard Password</h3>
+        <div class="profile-body">
+          <div class="field">
+            <label>New Password</label>
+            <input type="password" id="profileDashPass" placeholder="Leave blank to keep current">
+          </div>
+          <div style="display:flex;align-items:flex-end;">
+            <button class="btn-primary" onclick="saveDashPassword()">Update Password</button>
+          </div>
+          <span id="profileDashStatus" class="profile-status" style="align-self:flex-end;"></span>
+        </div>
+      </div>
     </div>
-    <div class="field">
-      <label>Password</label>
-      <input type="password" id="password" placeholder="Password" autocomplete="current-password">
+  </div>
+
+  <!-- Dashboard tab -->
+  <div id="tab-dashboard" class="tab-panel">
+  <!-- Credentials / Scrape -->
+  <div class="creds-card">
+    <div id="credFields" style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;">
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="username" placeholder="Cover2Sports username" autocomplete="username">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="Password" autocomplete="current-password">
+      </div>
     </div>
     <label class="headed-label">
       <input type="checkbox" id="headed"> Headed mode
@@ -159,7 +272,7 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
     <div class="filters">
       <div class="filter-group">
         <label>Start Date</label>
-        <input type="date" id="fStartDate" value="2026-03-02">
+        <input type="date" id="fStartDate">
       </div>
       <div class="filter-group">
         <label>End Date</label>
@@ -258,7 +371,8 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
     </div>
 
   </div><!-- /dashSection -->
-</div>
+  </div><!-- /tab-dashboard -->
+</div><!-- /main -->
 
 <script>
 // ============================================================
@@ -269,6 +383,7 @@ let sortKey = 'date';
 let sortDir = { date: -1 };
 let filteredBets = [];
 let charts = {};
+let hasSavedCreds = false;
 
 // ============================================================
 // Init
@@ -282,7 +397,62 @@ document.addEventListener('DOMContentLoaded', () => {
       if (e.key === 'Enter') runScraper();
     });
   });
+  loadProfile();
 });
+
+// ============================================================
+// Tabs
+// ============================================================
+function switchTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).style.display = '';
+  document.getElementById('tabBtn' + name.charAt(0).toUpperCase() + name.slice(1)).classList.add('active');
+}
+
+// ============================================================
+// Profile
+// ============================================================
+async function loadProfile() {
+  const resp = await fetch('/api/profile');
+  if (!resp.ok) return;
+  const data = await resp.json();
+  hasSavedCreds = !!data.has_cover2sports_creds;
+  document.getElementById('credFields').style.display = hasSavedCreds ? 'none' : '';
+  document.getElementById('profileSavedBadge').textContent = hasSavedCreds ? '\u2713' : '';
+}
+
+async function saveProfile() {
+  const u = document.getElementById('profileC2SUser').value.trim();
+  const p = document.getElementById('profileC2SPass').value.trim();
+  const statusEl = document.getElementById('profileStatus');
+  if (!u && !p) { statusEl.textContent = 'Nothing to save.'; return; }
+  const payload = {};
+  if (u) payload.cover2sports_username = u;
+  if (p) payload.cover2sports_password = p;
+  const resp = await fetch('/api/save-profile', {
+    method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)
+  });
+  const json = await resp.json();
+  statusEl.textContent = json.ok ? 'Saved!' : (json.error || 'Error');
+  if (json.ok) {
+    document.getElementById('profileC2SUser').value = '';
+    document.getElementById('profileC2SPass').value = '';
+    await loadProfile();
+  }
+}
+
+async function saveDashPassword() {
+  const d = document.getElementById('profileDashPass').value;
+  const statusEl = document.getElementById('profileDashStatus');
+  if (!d) { statusEl.textContent = 'Enter a new password first.'; return; }
+  const resp = await fetch('/api/save-profile', {
+    method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({new_password: d})
+  });
+  const json = await resp.json();
+  statusEl.textContent = json.ok ? 'Password updated!' : (json.error || 'Error');
+  if (json.ok) document.getElementById('profileDashPass').value = '';
+}
 
 // ============================================================
 // Scraper
@@ -294,7 +464,7 @@ async function runScraper() {
   const scrapeStart = document.getElementById('scrapeStart').value;
   const scrapeEnd   = document.getElementById('scrapeEnd').value;
 
-  if (!username || !password) {
+  if (!hasSavedCreds && (!username || !password)) {
     showStatus('error', 'Please enter your username and password.');
     return;
   }
@@ -321,6 +491,10 @@ async function runScraper() {
     document.getElementById('lastUpdated').textContent = 'Updated: ' + now;
     showStatus('success', `Loaded ${BETS.length} bet(s) \u2014 last updated ${now}`);
     document.getElementById('dashSection').style.display = '';
+
+    // Sync filter date range to the scraped range so all bets are visible
+    document.getElementById('fStartDate').value = scrapeStart;
+    document.getElementById('fEndDate').value = scrapeEnd;
 
     // Rebuild sport dropdown
     const sports = [...new Set(BETS.map(b => b.sport).filter(Boolean))].sort();
@@ -376,8 +550,8 @@ function applyFilters() {
 }
 
 function resetFilters() {
-  document.getElementById('fStartDate').value = '2026-03-02';
-  document.getElementById('fEndDate').value = new Date().toISOString().slice(0, 10);
+  document.getElementById('fStartDate').value = '';
+  document.getElementById('fEndDate').value = '';
   document.getElementById('fSport').value = '';
   document.querySelectorAll('#fBetType input, #fWagerType input, #fResult input')
     .forEach(cb => cb.checked = true);
@@ -568,12 +742,145 @@ function renderTable() {
 </html>"""
 
 
+LOGIN_HTML = """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cover2Sports &mdash; Sign In</title>
+<style>
+  * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+  body {{ background: #0f1117; color: #e2e8f0; font-family: system-ui, sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; }}
+  .card {{ background: #1a1d27; border: 1px solid #2d3148; border-radius: 10px; padding: 36px 40px; width: 360px; }}
+  h1 {{ color: #5b8dee; font-size: 1.3rem; margin-bottom: 24px; text-align: center; }}
+  label {{ display: block; font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }}
+  input[type="password"] {{ width: 100%; background: #22263a; border: 1px solid #2d3148; color: #e2e8f0; border-radius: 6px; padding: 9px 12px; font-size: 0.9rem; margin-bottom: 18px; }}
+  input:focus {{ outline: 1px solid #5b8dee; }}
+  button {{ width: 100%; background: #5b8dee; color: #fff; border: none; border-radius: 6px; padding: 10px; font-size: 0.95rem; font-weight: 600; cursor: pointer; }}
+  .error {{ color: #ef4444; font-size: 0.85rem; margin-bottom: 14px; }}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Cover2Sports Dashboard</h1>
+  {error}
+  <form method="POST" action="/login">
+    <label>Password</label>
+    <input type="password" name="password" placeholder="Dashboard password" autofocus>
+    <button type="submit">Sign In</button>
+  </form>
+</div>
+</body>
+</html>"""
+
+
+SETUP_HTML = """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cover2Sports &mdash; Create Account</title>
+<style>
+  * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+  body {{ background: #0f1117; color: #e2e8f0; font-family: system-ui, sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; }}
+  .card {{ background: #1a1d27; border: 1px solid #2d3148; border-radius: 10px; padding: 36px 40px; width: 400px; }}
+  h1 {{ color: #5b8dee; font-size: 1.3rem; margin-bottom: 8px; text-align: center; }}
+  .desc {{ color: #94a3b8; font-size: 0.83rem; text-align: center; margin-bottom: 24px; }}
+  label {{ display: block; font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }}
+  input[type="password"] {{ width: 100%; background: #22263a; border: 1px solid #2d3148; color: #e2e8f0; border-radius: 6px; padding: 9px 12px; font-size: 0.9rem; margin-bottom: 18px; }}
+  input:focus {{ outline: 1px solid #5b8dee; }}
+  button {{ width: 100%; background: #5b8dee; color: #fff; border: none; border-radius: 6px; padding: 10px; font-size: 0.95rem; font-weight: 600; cursor: pointer; }}
+  .error {{ color: #ef4444; font-size: 0.85rem; margin-bottom: 14px; }}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Create Dashboard Account</h1>
+  <p class="desc">Choose a password to protect your dashboard. You only do this once.</p>
+  {error}
+  <form method="POST" action="/setup">
+    <label>Password</label>
+    <input type="password" name="password" placeholder="Choose a password" autofocus>
+    <label>Confirm Password</label>
+    <input type="password" name="confirm_password" placeholder="Repeat password">
+    <button type="submit">Create Account</button>
+  </form>
+</div>
+</body>
+</html>"""
+
+
 @app.route('/')
+@login_required
 def index():
     return DASHBOARD_HTML
 
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        cfg = load_config()
+        pw  = request.form.get('password', '')
+        if cfg and check_password_hash(cfg['dashboard_password_hash'], pw):
+            session['logged_in'] = True
+            return redirect(url_for('index'))
+        return LOGIN_HTML.format(error='<p class="error">Incorrect password.</p>')
+    return LOGIN_HTML.format(error='')
+
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
+
+
+@app.route('/setup', methods=['GET', 'POST'])
+def setup():
+    if load_config():
+        return redirect(url_for('index'))
+    if request.method == 'POST':
+        pw  = request.form.get('password', '')
+        pw2 = request.form.get('confirm_password', '')
+        if not pw:
+            return SETUP_HTML.format(error='<p class="error">Password cannot be empty.</p>')
+        if pw != pw2:
+            return SETUP_HTML.format(error='<p class="error">Passwords do not match.</p>')
+        cfg = {
+            'secret_key': secrets.token_hex(32),
+            'dashboard_password_hash': generate_password_hash(pw),
+            'cover2sports_username': '',
+            'cover2sports_password': '',
+        }
+        save_config(cfg)
+        session['logged_in'] = True
+        return redirect(url_for('index'))
+    return SETUP_HTML.format(error='')
+
+
+@app.route('/api/profile')
+@login_required
+def api_profile():
+    cfg = load_config() or {}
+    return jsonify({'has_cover2sports_creds': bool(cfg.get('cover2sports_username'))})
+
+
+@app.route('/api/save-profile', methods=['POST'])
+@login_required
+def api_save_profile():
+    data = request.get_json(force=True)
+    cfg  = load_config() or {}
+    if data.get('cover2sports_username') is not None:
+        cfg['cover2sports_username'] = data['cover2sports_username'].strip()
+    if data.get('cover2sports_password') is not None:
+        cfg['cover2sports_password'] = data['cover2sports_password'].strip()
+    if data.get('new_password'):
+        cfg['dashboard_password_hash'] = generate_password_hash(data['new_password'])
+    save_config(cfg)
+    return jsonify({'ok': True})
+
+
 @app.route('/api/scrape', methods=['POST'])
+@login_required
 def api_scrape():
     print("=== /api/scrape called ===", flush=True)
     try:
@@ -595,6 +902,11 @@ def api_scrape():
     end_date   = (data.get('end_date')   or '').strip() or date.today().isoformat()
 
     if not username or not password:
+        cfg = load_config() or {}
+        username = cfg.get('cover2sports_username', '').strip()
+        password = cfg.get('cover2sports_password', '').strip()
+
+    if not username or not password:
         return jsonify({'error': 'Username and password are required.'}), 400
 
     try:
@@ -609,7 +921,7 @@ if __name__ == '__main__':
     print('=' * 55)
     print(' Cover2Sports Dashboard Server')
     print('=' * 55)
-    print(' Open http://localhost:5000 in your browser')
+    print(' Open http://localhost:5001 in your browser')
     print(' Press Ctrl+C to stop')
     print('=' * 55)
     app.run(host='127.0.0.1', port=5001, debug=False)

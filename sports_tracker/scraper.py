@@ -92,20 +92,76 @@ def infer_bet_type(text: str) -> str:
 def infer_sport(text: str) -> str:
     """Guess sport from team/league name text."""
     low = text.lower()
-    sport_keywords = {
-        "NFL": ["nfl", "chiefs", "eagles", "patriots", "cowboys", "49ers", "packers"],
-        "NBA": ["nba", "lakers", "celtics", "warriors", "bulls", "heat", "nets"],
-        "MLB": ["mlb", "yankees", "dodgers", "red sox", "cubs", "mets", "braves"],
-        "NHL": ["nhl", "bruins", "rangers", "penguins", "maple leafs", "kings"],
-        "NCAAF": ["ncaaf", "college football", "cfb"],
-        "NCAAB": ["ncaab", "college basketball", "cbb", "march madness"],
-        "Soccer": ["soccer", "mls", "epl", "premier league", "champions league", "fifa", "la liga"],
-        "UFC/MMA": ["ufc", "mma", "bellator"],
-        "Boxing": ["boxing", "bout"],
-    }
-    for sport, keywords in sport_keywords.items():
-        if any(k in low for k in keywords):
-            return sport
+
+    # Explicit league/sport indicators (checked first)
+    if any(k in low for k in ["ncaamb", "ncaab", "college basketball", "cbb", "march madness"]):
+        return "NCAAB"
+    if any(k in low for k in ["ncaaw", "women's basketball"]):
+        return "NCAAW"
+    if "nba" in low:
+        return "NBA"
+    if any(k in low for k in ["nfl", "ncaaf", "college football", "cfb"]):
+        return "NFL"
+    if any(k in low for k in ["mlb", "baseball"]):
+        return "MLB"
+    if any(k in low for k in ["nhl", "hockey"]):
+        return "NHL"
+    if any(k in low for k in ["pga", "lpga", "golf", "masters", "cognizant", "rbc heritage",
+                               "the players", "genesis invitational", "farmers insurance",
+                               "arnold palmer", "memorial", "us open golf", "british open",
+                               "odds to win"]):
+        return "Golf"
+    if any(k in low for k in ["soccer", "mls", "epl", "premier league", "champions league",
+                               "fifa", "la liga", "bundesliga", "serie a", "ligue 1"]):
+        return "Soccer"
+    if any(k in low for k in ["ufc", "mma", "bellator"]):
+        return "UFC/MMA"
+    if any(k in low for k in ["boxing", "bout"]):
+        return "Boxing"
+
+    # NBA teams
+    if any(k in low for k in [
+        "lakers", "celtics", "warriors", "bulls", "heat", "nets", "knicks", "bucks",
+        "suns", "clippers", "nuggets", "jazz", "thunder", "rockets", "wizards",
+        "pistons", "cavaliers", "cavs", "spurs", "raptors", "hawks", "hornets",
+        "pelicans", "grizzlies", "timberwolves", "trail blazers", "blazers", "kings",
+        "magic", "pacers", "76ers", "sixers", "mavericks", "mavs",
+    ]):
+        return "NBA"
+
+    # NCAAB teams
+    if any(k in low for k in [
+        "kansas", "duke", "kentucky", "gonzaga", "villanova", "baylor", "houston",
+        "ucla", "usc", "arizona", "michigan st", "ohio st", "florida", "texas",
+        "uconn", "connecticut", "st johns", "yale", "rhode island", "santa clara",
+        "st marys", "illinois", "iowa", "indiana", "purdue", "wisconsin",
+        "notre dame", "louisville", "syracuse", "pittsburgh", "clemson",
+        "alabama", "auburn", "lsu", "tennessee", "arkansas", "ole miss", "vanderbilt",
+        "nc state", "north carolina st", "geo washington", "montana st",
+        "marquette", "creighton", "xavier", "butler", "dayton", "wichita st",
+        "seattle u", "seattle redhawks",
+    ]):
+        return "NCAAB"
+
+    # NFL teams
+    if any(k in low for k in [
+        "chiefs", "eagles", "patriots", "cowboys", "49ers", "packers", "bears",
+        "giants", "jets", "dolphins", "bills", "ravens", "steelers", "browns",
+        "bengals", "titans", "colts", "jaguars", "texans", "broncos", "raiders",
+        "chargers", "seahawks", "rams", "cardinals", "falcons", "saints", "panthers",
+        "buccaneers", "vikings", "lions", "redskins", "commanders",
+    ]):
+        return "NFL"
+
+    # Golf player names
+    if any(k in low for k in [
+        "meissner", "bezuidenhout", "hojgaard", "mcilroy", "spieth", "koepka",
+        "scheffler", "morikawa", "fleetwood", "hovland", "schauffele", "fitzpatrick",
+        "cantlay", "thomas", "johnson", "scott", "rose", "fowler", "finau",
+        "lowry", "rahm", "burns", "english", "young", "kim", "im ",
+    ]):
+        return "Golf"
+
     return "Other"
 
 
@@ -284,12 +340,22 @@ def parse_modal_bet_row(cells: list, bet_date: str = "") -> Optional[dict]:
     if odds_match:
         odds = parse_american_odds(odds_match.group(1))
 
+    # Detect wager type (Parlay/Teaser/Straight)
+    if re.search(r'\bparlay\b', desc, re.IGNORECASE):
+        wager_type = "Parlay"
+    elif re.search(r'\bteaser\b', desc, re.IGNORECASE):
+        wager_type = "Teaser"
+    else:
+        wager_type = "Straight"
+
     # Detect bet type from description
+    # Site appends O/U directly to team name (e.g. "PistonsU 220½", "TexasO 158"),
+    # so don't require a word boundary — just O or U followed by whitespace + digit.
     is_half = "1st Half" in desc or "2nd Half" in desc or "Half" in desc
-    if re.search(r'\bO\s+\d|\bOver\b', desc, re.IGNORECASE):
+    if re.search(r'O\s+\d+[½¼¾]?|\bOver\b|\bover\s+\d', desc, re.IGNORECASE):
         bet_type = "Over/Under"
         pick = "Over"
-    elif re.search(r'\bU\s+\d|\bUnder\b', desc, re.IGNORECASE):
+    elif re.search(r'U\s+\d+[½¼¾]?|\bUnder\b|\bunder\s+\d', desc, re.IGNORECASE):
         bet_type = "Over/Under"
         pick = "Under"
     elif re.search(r'[+-]\d+[½¼¾]?\s+[+-]\d{2,3}', desc):
@@ -308,7 +374,7 @@ def parse_modal_bet_row(cells: list, bet_date: str = "") -> Optional[dict]:
         "date":        bet_date,
         "sport":       infer_sport(desc),
         "bet_type":    bet_type,
-        "wager_type":  "Straight",
+        "wager_type":  wager_type,
         "game":        game,
         "pick":        pick,
         "odds":        odds,
@@ -354,7 +420,8 @@ def dlog(msg: str):
     """Write a debug line to debug.log with flush."""
     with open(DEBUG_LOG, "a", encoding="utf-8") as f:
         f.write(msg + "\n")
-    print(msg, flush=True)
+    sys.stdout.buffer.write((msg + "\n").encode("utf-8", errors="replace"))
+    sys.stdout.buffer.flush()
 
 
 def run_scraper(username: str, password: str, headed: bool = False,
@@ -505,18 +572,15 @@ def run_scraper(username: str, password: str, headed: bool = False,
 
             dlog(f"Scraping per-day modals for {start_date} to {end_date}")
 
-            # Read the week-selection dropdown (find first <select> with >1 option)
+            # Read the week-selection dropdown (find first <select> whose options mention "week")
             dropdown_info = page.evaluate("""
                 () => {
                     for (const sel of document.querySelectorAll('select')) {
-                        if (sel.options.length >= 2) {
-                            return {
-                                options: [...sel.options].map((o, i) => ({
-                                    index: i,
-                                    value: o.value,
-                                    text: o.text.trim()
-                                }))
-                            };
+                        const opts = [...sel.options].map((o, i) => ({
+                            index: i, value: o.value, text: o.text.trim()
+                        }));
+                        if (opts.some(o => /week/i.test(o.text))) {
+                            return { options: opts };
                         }
                     }
                     return null;
@@ -530,32 +594,19 @@ def run_scraper(username: str, password: str, headed: bool = False,
             else:
                 dlog("  No week dropdown found — scraping current week only")
 
-            def parse_week_from_option(text: str):
-                """Try to extract a week-start date from option label text."""
-                m = re.search(r'(\d{1,2})/(\d{1,2})(?:/(\d{2,4}))?', text)
-                if m:
-                    mon = int(m.group(1))
-                    day_n = int(m.group(2))
-                    yr_s = m.group(3)
-                    yr = int(yr_s) + (2000 if yr_s and len(yr_s) == 2 else 0) if yr_s else today.year
-                    try:
-                        return date(yr, mon, day_n)
-                    except ValueError:
-                        pass
-                return None
+            def week_range_for_option(idx: int, ref_today: date):
+                """Index 0 = This Week, 1 = Last Week, 2 = 2 Weeks Ago, …"""
+                current_monday = ref_today - timedelta(days=ref_today.weekday())
+                week_start = current_monday - timedelta(weeks=idx)
+                return week_start, week_start + timedelta(days=6)
 
             # Determine which dropdown options to visit
             if dropdown_info:
                 opts_to_visit = []
                 for opt in dropdown_info['options']:
-                    week_start_d = parse_week_from_option(opt['text'])
-                    if week_start_d is None:
-                        # Can't parse date — include it (may be "This Week" label)
+                    ws, we = week_range_for_option(opt['index'], today)
+                    if we >= start_d and ws <= end_d:
                         opts_to_visit.append(opt)
-                    else:
-                        week_end_d = week_start_d + timedelta(days=6)
-                        if week_end_d >= start_d and week_start_d <= end_d:
-                            opts_to_visit.append(opt)
                 dlog(f"  Visiting {len(opts_to_visit)} option(s) out of {len(dropdown_info['options'])}")
             else:
                 opts_to_visit = [None]  # None = don't change dropdown, just use current view
@@ -661,9 +712,51 @@ def run_scraper(username: str, password: str, headed: bool = False,
 
             for opt in opts_to_visit:
                 if opt is not None and dropdown_info:
-                    dlog(f"  Selecting dropdown option: {opt['text']!r}")
-                    page.select_option('select', value=opt['value'])
-                    page.wait_for_timeout(2000)
+                    dlog(f"  Selecting dropdown option: {opt['text']!r} (value={opt['value']!r})")
+
+                    # Step 1: Make the week select visible so Playwright can interact with it natively
+                    page.evaluate("""
+                        () => {
+                            for (const sel of document.querySelectorAll('select')) {
+                                if ([...sel.options].some(o => /week/i.test(o.text))) {
+                                    sel.style.cssText += '; display:block !important; visibility:visible !important; opacity:1 !important; position:fixed !important; top:0 !important; left:0 !important; z-index:99999 !important;';
+                                    break;
+                                }
+                            }
+                        }
+                    """)
+
+                    # Step 2: Try Playwright's native select_option (fires proper browser events)
+                    changed = False
+                    try:
+                        week_sel = page.locator('select').filter(has_text=re.compile('week', re.I)).first
+                        week_sel.select_option(value=opt['value'], timeout=3000)
+                        changed = True
+                        dlog(f"  select changed via native Playwright: True")
+                    except Exception as e:
+                        dlog(f"  Native select failed ({e}), falling back to JS dispatch")
+                        # Step 2b: JS fallback — target only the week select
+                        changed = page.evaluate(f"""
+                            () => {{
+                                for (const sel of document.querySelectorAll('select')) {{
+                                    if (![...sel.options].some(o => /week/i.test(o.text))) continue;
+                                    sel.value = {repr(opt['value'])};
+                                    sel.dispatchEvent(new Event('change', {{bubbles: true}}));
+                                    sel.dispatchEvent(new Event('input',  {{bubbles: true}}));
+                                    return true;
+                                }}
+                                return false;
+                            }}
+                        """)
+                        dlog(f"  select changed via JS: {changed}")
+
+                    # Step 3: Wait for the page to actually update
+                    try:
+                        page.wait_for_load_state('networkidle', timeout=5000)
+                    except Exception:
+                        pass
+                    page.wait_for_timeout(1500)
+
                 scrape_day_rows_for_current_view()
 
             dlog(f"Total bets collected: {len(bets)}")
