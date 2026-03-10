@@ -219,6 +219,20 @@ def infer_sport(text: str) -> str:
     return "Other"
 
 
+def infer_amount(pl: float, result: str, odds: Optional[int], wager_type: str) -> Optional[float]:
+    """Back-calculate the wager amount from P/L and odds."""
+    if pl is None:
+        return None
+    if result == "Loss":
+        return round(abs(pl), 2)
+    if result == "Win" and odds is not None and wager_type == "Straight":
+        if odds < 0:
+            return round(pl * abs(odds) / 100, 2)
+        elif odds > 0:
+            return round(pl * 100 / odds, 2)
+    return None
+
+
 def classify_wager_type(text: str) -> str:
     """Map single-letter codes or full words to wager type strings."""
     low = text.strip().lower()
@@ -450,7 +464,7 @@ def parse_modal_bet_row(cells: list, bet_date: str = "") -> Optional[dict]:
         "game":        game,
         "pick":        pick,
         "odds":        odds,
-        "amount":      None,
+        "amount":      infer_amount(pl, result, odds, wager_type),
         "result":      result,
         "profit_loss": pl,
     }
