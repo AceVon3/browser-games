@@ -337,7 +337,7 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
         <canvas id="chartSport"></canvas>
       </div>
       <div class="chart-card">
-        <h3>Wager Type Breakdown</h3>
+        <h3>Bet Type Breakdown</h3>
         <canvas id="chartType"></canvas>
       </div>
     </div>
@@ -677,10 +677,16 @@ function renderSportChart() {
 
 function renderTypeChart() {
   const counts = {};
-  filteredBets.forEach(b => { const t = b.wager_type || 'Straight'; counts[t] = (counts[t] || 0) + 1; });
+  filteredBets.forEach(b => {
+    // Parlays and teasers are their own category; straight bets break down by bet type
+    const t = (b.wager_type === 'Parlay' || b.wager_type === 'Teaser' || b.wager_type === 'Reverse' || b.wager_type === 'IF Bet')
+      ? b.wager_type
+      : (b.bet_type || 'Moneyline');
+    counts[t] = (counts[t] || 0) + 1;
+  });
   const labels = Object.keys(counts);
   const data   = labels.map(l => counts[l]);
-  const colors = ['#4f8ef7', '#22c55e', '#f59e0b', '#ec4899', '#8b5cf6'];
+  const colors = ['#4f8ef7', '#22c55e', '#f59e0b', '#ec4899', '#8b5cf6', '#06b6d4'];
 
   const ctx = document.getElementById('chartType').getContext('2d');
   if (charts.type) charts.type.destroy();
