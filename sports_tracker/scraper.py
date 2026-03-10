@@ -403,12 +403,6 @@ def parse_modal_bet_row(cells: list, bet_date: str = "") -> Optional[dict]:
     else:
         result = "Pending"
 
-    # Extract odds — last token matching +/-NNN or NNN at end of description
-    odds: Optional[int] = None
-    odds_match = re.search(r'([+-]?\d{2,4})\s*(?:-\s*1st Half|$)', desc)
-    if odds_match:
-        odds = parse_american_odds(odds_match.group(1))
-
     # Detect wager type (Parlay/Teaser/Straight)
     if re.search(r'\bparlay\b', desc, re.IGNORECASE):
         wager_type = "Parlay"
@@ -420,6 +414,15 @@ def parse_modal_bet_row(cells: list, bet_date: str = "") -> Optional[dict]:
     # Use only the first line for bet type / pick detection
     # (parlays and futures may have multi-line descriptions)
     desc_first = desc.split('\n')[0].strip()
+
+    # Extract odds — last token matching +/-NNN or NNN at end of first line
+    odds: Optional[int] = None
+    odds_match = re.search(r'([+-]?\d{2,4})\s*(?:-\s*1st Half|$)', desc_first)
+    if odds_match:
+        odds = parse_american_odds(odds_match.group(1))
+    # Default to -110 for straight bets when odds aren't in the description
+    if odds is None and wager_type == "Straight":
+        odds = -110
 
     # Detect bet type from description
     # Site appends O/U directly to team name (e.g. "PistonsU 220½", "TexasO 158"),
