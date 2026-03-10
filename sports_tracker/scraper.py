@@ -125,6 +125,12 @@ def infer_sport(text: str) -> str:
         return "MLB"
     if any(k in low for k in ["nhl", "hockey"]):
         return "NHL"
+    # International hockey — country names with (M)/(W) gender suffix or standalone
+    if any(k in low for k in [
+        "finland", "sweden", "canada", "russia", "czech", "germany", "norway",
+        "slovakia", "switzerland", "austria", "latvia", "denmark", "Belarus",
+    ]):
+        return "NHL"
     if any(k in low for k in ["soccer", "mls", "epl", "premier league", "champions league",
                                "fifa", "la liga", "bundesliga", "serie a", "ligue 1"]):
         return "Soccer"
@@ -132,6 +138,10 @@ def infer_sport(text: str) -> str:
         return "UFC/MMA"
     if any(k in low for k in ["boxing", "bout"]):
         return "Boxing"
+    # NFL props without team names
+    if any(k in low for k in ["coin toss", "td scorer", "first td", "field goal",
+                               "crossbar", "hits post", "timeout"]):
+        return "NFL"
 
     # Golf-specific tournaments and terms (before generic "odds to win" check)
     if any(k in low for k in ["pga", "lpga", "golf", "masters", "cognizant", "rbc heritage",
@@ -142,6 +152,10 @@ def infer_sport(text: str) -> str:
 
     # "Odds to win" futures — classify by context before defaulting to Golf
     if "odds to win" in low:
+        # NFL props disguised as futures
+        if any(k in low for k in ["field goal", "td scorer", "first td", "touchdown",
+                                   "coin toss", "crossbar", "hits post", "timeout"]):
+            return "NFL"
         # Basketball conference/tournament futures
         if any(k in low for k in [
             "atlantic sun", "ohio valley", "west coast", "big ten", "big 12",
@@ -151,15 +165,6 @@ def infer_sport(text: str) -> str:
             "patriot league", "ivy league", "wac tournament", "a-sun",
         ]):
             return "NCAAB"
-        # Golf player names → Golf futures
-        if any(k in low for k in [
-            "meissner", "bezuidenhout", "hojgaard", "mcilroy", "spieth", "koepka",
-            "scheffler", "morikawa", "fleetwood", "hovland", "schauffele", "fitzpatrick",
-            "cantlay", "thomas", "johnson", "scott", "rose", "fowler", "finau",
-            "lowry", "rahm", "burns", "english", "young", "kim", "macintyre",
-            "bourne", "td scorer", "first td", "coin toss",
-        ]):
-            return "Golf"
         return "Golf"  # default "odds to win" to Golf when no other context
 
     # NBA teams
@@ -179,10 +184,10 @@ def infer_sport(text: str) -> str:
         "uconn", "connecticut", "st johns", "yale", "rhode island", "santa clara",
         "st marys", "illinois", "iowa", "indiana", "purdue", "wisconsin",
         "notre dame", "louisville", "syracuse", "pittsburgh", "clemson",
-        "alabama", "auburn", "lsu", "tennessee", "arkansas", "ole miss", "vanderbilt",
+        "auburn", "lsu", "tennessee", "arkansas", "ole miss", "vanderbilt",
         "nc state", "north carolina st", "geo washington", "montana st",
         "marquette", "creighton", "xavier", "butler", "dayton", "wichita st",
-        "seattle u", "seattle redhawks", "morehead st", "high point",
+        "seattle u", "seattle redhawks", "seattle", "morehead st", "high point",
         "north florida", "fla gulf coast", "florida gulf coast", "bellarmine",
         "central arkansas", "ark little rock", "lindenwood", "se missouri",
         "southern illinois", "eastern illinois", "eastern kentucky",
@@ -190,11 +195,23 @@ def infer_sport(text: str) -> str:
         "evansville", "northern iowa", "south dakota st", "st thomas",
         "manhattan", "fairfield", "portland", "pepperdine", "drake",
         "stetson", "north alabama", "jacksonville", "north carolina a&t",
-        "northeastern", "murray st", "illinois chicago", "sacred heart",
+        "northeastern", "murray st", "illinois chicago", "uic", "sacred heart",
         "merrimack", "longwood", "west georgia", "campbell", "drexel",
         "alcorn st", "alabama st", "nebraska omaha",
+        # Additional teams commonly seen
+        "hofstra", "towson", "navy", "army", "air force",
+        "miami ohio", "miami (oh)", "western michigan", "western mich",
+        "nebraska", "san francisco",
+        "mississippi st", "mississippi state", "smu",
     ]):
         return "NCAAB"
+
+    # College football bowl teams not caught above → NCAAF (grouped with NFL)
+    if any(k in low for k in [
+        "mississippi", "ole miss", "alabama", "oregon", "texas tech",
+        "texas st", "texas state",
+    ]):
+        return "NCAAF"
 
     # NFL teams
     if any(k in low for k in [
