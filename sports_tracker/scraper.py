@@ -425,8 +425,8 @@ def parse_modal_bet_row(cells: list, bet_date: str = "") -> Optional[dict]:
     # Site appends O/U directly to team name (e.g. "PistonsU 220½", "TexasO 158"),
     # so don't require a word boundary — just O or U followed by whitespace + digit.
     is_half = "1st Half" in desc_first or "2nd Half" in desc_first
-    total_match_o = re.search(r'O\s+(\d+[½¼¾]?)|\bOver\s+(\d+[½¼¾]?)', desc_first, re.IGNORECASE)
-    total_match_u = re.search(r'U\s+(\d+[½¼¾]?)|\bUnder\s+(\d+[½¼¾]?)', desc_first, re.IGNORECASE)
+    total_match_o = re.search(r'O\s+(\d+(?:\.\d+)?[½¼¾]?)|\bOver\s+(\d+(?:\.\d+)?[½¼¾]?)', desc_first, re.IGNORECASE)
+    total_match_u = re.search(r'U\s+(\d+(?:\.\d+)?[½¼¾]?)|\bUnder\s+(\d+(?:\.\d+)?[½¼¾]?)', desc_first, re.IGNORECASE)
     spread_match  = re.search(r'(.+?)\s+([+-]\d+[½¼¾]?)\s+[+-]\d{2,3}', desc_first)
 
     if total_match_o:
