@@ -9,6 +9,7 @@ import os
 import csv
 import logging
 from datetime import datetime, date
+from typing import Optional, List
 
 from src.fetch import fetch_odds
 from src.signal import moneyline_to_implied_prob
@@ -27,7 +28,7 @@ RESULTS_COLUMNS = [
 ]
 
 
-def fetch_closing_lines() -> list[dict]:
+def fetch_closing_lines() -> List[dict]:
     """Fetch closing lines for all games.
 
     Should be called ~5 min before first pitch.
@@ -37,7 +38,7 @@ def fetch_closing_lines() -> list[dict]:
     return fetch_odds()
 
 
-def calculate_clv(opening_line: int | None, closing_line: int | None) -> float | None:
+def calculate_clv(opening_line: Optional[int], closing_line: Optional[int]) -> Optional[float]:
     """Calculate Closing Line Value.
 
     CLV = closing_implied_prob - opening_implied_prob
@@ -99,7 +100,7 @@ def log_signal(game: dict, signal_type: str, pass_version: str = "final") -> Non
         writer.writerow(row)
 
 
-def update_closing_lines(date_str: str, closing_odds: list[dict]) -> None:
+def update_closing_lines(date_str: str, closing_odds: List[dict]) -> None:
     """Update results_log.csv with closing lines and CLV for a given date.
 
     Matches games by home_team + away_team.

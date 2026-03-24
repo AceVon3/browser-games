@@ -10,6 +10,7 @@ import os
 import sys
 import logging
 from datetime import date, datetime
+from typing import Optional, List
 
 from dotenv import load_dotenv
 
@@ -51,7 +52,7 @@ logging.basicConfig(
 logger = logging.getLogger("pipeline")
 
 
-def pregame_pass(date_str: str | None = None):
+def pregame_pass(date_str: Optional[str] = None):
     """Run the pregame pass: re-fetch, diff, re-score, final signals."""
     date_str = date_str or date.today().isoformat()
     logger.info("=" * 60)
@@ -293,7 +294,7 @@ def _update_odds_only(morning: dict, odds_lookup: dict) -> dict:
     return result
 
 
-def _build_odds_lookup(all_odds: list[dict]) -> dict:
+def _build_odds_lookup(all_odds: List[dict]) -> dict:
     lookup = {}
     for odds in all_odds:
         home = odds.get("home_team", "")

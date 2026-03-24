@@ -9,6 +9,7 @@ import os
 import json
 import logging
 from datetime import date, datetime
+from typing import Optional, Tuple
 
 import pandas as pd
 from dotenv import load_dotenv
@@ -37,8 +38,8 @@ MAX_WORKLOAD_3DAY = 15.0  # innings — beyond this bullpen is exhausted
 
 def build_bullpen_profile(
     team_abbrev: str,
-    reliever_stats: pd.DataFrame | None = None,
-    workload_3day: float | None = None,
+    reliever_stats: Optional[pd.DataFrame] = None,
+    workload_3day: Optional[float] = None,
     high_lev_available: bool = True,
 ) -> dict:
     """Build a bullpen profile for a team.
@@ -90,7 +91,7 @@ def build_bullpen_profile(
     return profile
 
 
-def _aggregate_reliever_stats(df: pd.DataFrame) -> tuple[float, float]:
+def _aggregate_reliever_stats(df: pd.DataFrame) -> Tuple[float, float]:
     """Aggregate ERA and WHIP from individual reliever stats, weighted by IP.
 
     Expects DataFrame with columns: ERA (or era), WHIP (or whip), IP (or ip).

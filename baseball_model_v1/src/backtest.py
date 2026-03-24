@@ -14,6 +14,7 @@ import csv
 import logging
 from datetime import datetime, timedelta, date
 from collections import defaultdict
+from typing import Optional, List
 
 import pandas as pd
 import numpy as np
@@ -35,7 +36,7 @@ logger = logging.getLogger("pipeline")
 BACKTEST_DIR = os.path.join(os.path.dirname(__file__), "..", "data", "backtest")
 
 
-def run_backtest(season: int, start_date: str | None = None, end_date: str | None = None):
+def run_backtest(season: int, start_date: Optional[str] = None, end_date: Optional[str] = None):
     """Run the full backtest for a season.
 
     Args:
@@ -95,7 +96,7 @@ def run_backtest(season: int, start_date: str | None = None, end_date: str | Non
     logger.info("Backtest complete: %d games processed", len(results))
 
 
-def _backtest_game(game: dict, season: int, park_factors: dict, date_str: str) -> dict | None:
+def _backtest_game(game: dict, season: int, park_factors: dict, date_str: str) -> Optional[dict]:
     """Process a single historical game for backtesting."""
     import statsapi
 
@@ -236,7 +237,7 @@ def _get_ou_result(ou: dict, actual_total: int, model_total: float) -> str:
     return "LOSS"
 
 
-def _write_backtest_results(results: list[dict], season: int):
+def _write_backtest_results(results: List[dict], season: int):
     """Write backtest results to CSV."""
     path = os.path.join(BACKTEST_DIR, f"backtest_{season}.csv")
     if not results:
@@ -251,7 +252,7 @@ def _write_backtest_results(results: list[dict], season: int):
     logger.info("Results written to %s", path)
 
 
-def _build_calibration_curves(results: list[dict], season: int):
+def _build_calibration_curves(results: List[dict], season: int):
     """Build calibration curves from backtest results.
 
     Three curves:

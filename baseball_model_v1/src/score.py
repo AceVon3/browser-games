@@ -12,6 +12,7 @@ Plus: park/weather adjustments, bullpen modifier, O/U model total, O/U score.
 
 import logging
 from datetime import date
+from typing import List, Tuple
 
 from src.bullpen import calculate_bullpen_modifier
 from src.weather import calculate_weather_adjustment
@@ -30,7 +31,7 @@ POSITION_WEIGHTS = {
 # Component 1: Zone Alignment Score (0-40 pts)
 # ---------------------------------------------------------------------------
 
-def zone_alignment_score(pitcher: dict, lineup: list[dict]) -> float:
+def zone_alignment_score(pitcher: dict, lineup: List[dict]) -> float:
     """Score how well the pitcher's attack zones exploit batter weaknesses.
 
     Pitcher top zones overlap batter cold zones → positive for pitcher.
@@ -69,7 +70,7 @@ def zone_alignment_score(pitcher: dict, lineup: list[dict]) -> float:
 # Component 2: Pitch Type Mismatch Score (0-30 pts)
 # ---------------------------------------------------------------------------
 
-def pitch_type_mismatch_score(pitcher: dict, lineup: list[dict]) -> float:
+def pitch_type_mismatch_score(pitcher: dict, lineup: List[dict]) -> float:
     """Score how well the pitcher's pitch mix exploits batter weaknesses.
 
     Primary pitch = batter's worst pitch type → +4 pts
@@ -118,7 +119,7 @@ def pitch_type_mismatch_score(pitcher: dict, lineup: list[dict]) -> float:
 # Component 3: Walk Rate Interaction Score (0-15 pts)
 # ---------------------------------------------------------------------------
 
-def walk_rate_score(pitcher: dict, lineup: list[dict]) -> float:
+def walk_rate_score(pitcher: dict, lineup: List[dict]) -> float:
     """Score walk rate interaction.
 
     Walk_Score = (lineup_avg_bb_pct - pitcher_bb_pct) × 50, capped ±15
@@ -150,7 +151,7 @@ def walk_rate_score(pitcher: dict, lineup: list[dict]) -> float:
 # Component 4: Handedness Adjustment (0-15 pts)
 # ---------------------------------------------------------------------------
 
-def handedness_score(pitcher: dict, lineup: list[dict]) -> float:
+def handedness_score(pitcher: dict, lineup: List[dict]) -> float:
     """Score handedness advantage.
 
     6+ batters facing pitcher from his dominant split side → +5 pts for pitcher.
@@ -183,7 +184,7 @@ def handedness_score(pitcher: dict, lineup: list[dict]) -> float:
 # Combined Edge Score
 # ---------------------------------------------------------------------------
 
-def calculate_edge_score(pitcher: dict, lineup: list[dict]) -> dict:
+def calculate_edge_score(pitcher: dict, lineup: List[dict]) -> dict:
     """Calculate the raw 4-component edge score for a pitcher vs lineup.
 
     Returns dict with component scores and raw total.
@@ -225,7 +226,7 @@ def apply_park_factor(raw_score: float, park_factor: float) -> float:
     return round(raw_score + adjustment, 2)
 
 
-def apply_weather(park_adjusted: float, weather: dict) -> tuple[float, dict]:
+def apply_weather(park_adjusted: float, weather: dict) -> Tuple[float, dict]:
     """Apply weather adjustment after park factor.
 
     Returns (adjusted_score, weather_adj_dict).
@@ -242,8 +243,8 @@ def apply_weather(park_adjusted: float, weather: dict) -> tuple[float, dict]:
 def score_matchup(
     home_pitcher: dict,
     away_pitcher: dict,
-    home_lineup: list[dict],
-    away_lineup: list[dict],
+    home_lineup: List[dict],
+    away_lineup: List[dict],
     home_bullpen_score: float,
     away_bullpen_score: float,
     park_factor: float,

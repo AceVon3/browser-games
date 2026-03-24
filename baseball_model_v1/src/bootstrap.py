@@ -8,6 +8,7 @@ of Statcast data for all pitchers and batters on opening day rosters.
 import os
 import logging
 from datetime import datetime
+from typing import Optional, List
 
 import statsapi
 from dotenv import load_dotenv
@@ -84,7 +85,7 @@ def bootstrap_all_teams():
     )
 
 
-def _parse_roster(roster_text: str, team_id: int, season: int) -> list[dict]:
+def _parse_roster(roster_text: str, team_id: int, season: int) -> List[dict]:
     """Parse roster text output into player dicts."""
     players = []
     for line in roster_text.split("\n"):
@@ -114,7 +115,7 @@ def _parse_roster(roster_text: str, team_id: int, season: int) -> list[dict]:
     return players
 
 
-def _bootstrap_pitcher(pid: int, name: str, start_dt: str, end_dt: str) -> dict | None:
+def _bootstrap_pitcher(pid: int, name: str, start_dt: str, end_dt: str) -> Optional[dict]:
     """Build and save a prior-season pitcher profile."""
     try:
         profile = build_pitcher_profile(pid, name, start_dt, end_dt)
@@ -137,7 +138,7 @@ def _bootstrap_pitcher(pid: int, name: str, start_dt: str, end_dt: str) -> dict 
         return None
 
 
-def _bootstrap_batter(pid: int, name: str, start_dt: str, end_dt: str) -> dict | None:
+def _bootstrap_batter(pid: int, name: str, start_dt: str, end_dt: str) -> Optional[dict]:
     """Build and save a prior-season batter profile."""
     try:
         profile = build_batter_profile(pid, name, start_dt, end_dt)

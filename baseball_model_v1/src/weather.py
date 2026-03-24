@@ -6,6 +6,7 @@ Uses OpenWeatherMap API for live data, Open-Meteo for historical (backtest).
 
 import os
 import logging
+from typing import Optional
 
 import requests
 from dotenv import load_dotenv
@@ -63,7 +64,7 @@ DOMED_STADIUMS = {
 }
 
 
-def fetch_weather(venue: str, game_time_utc: str | None = None) -> dict:
+def fetch_weather(venue: str, game_time_utc: Optional[str] = None) -> dict:
     """Fetch weather data for a stadium.
 
     Returns dict with keys: temp_f, wind_mph, wind_dir, wind_description,

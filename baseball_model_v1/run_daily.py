@@ -10,6 +10,7 @@ import os
 import sys
 import logging
 from datetime import date, datetime
+from typing import Optional, List
 
 from dotenv import load_dotenv
 
@@ -58,7 +59,7 @@ logging.basicConfig(
 logger = logging.getLogger("pipeline")
 
 
-def morning_pass(date_str: str | None = None):
+def morning_pass(date_str: Optional[str] = None):
     """Run the morning pass: fetch, profile, score, signal.
 
     Args:
@@ -122,7 +123,7 @@ def _process_game(
     odds_lookup: dict,
     park_factors: dict,
     date_str: str,
-) -> dict | None:
+) -> Optional[dict]:
     """Process a single game: fetch profiles, score, evaluate signals."""
     game_id = game["game_id"]
 
@@ -204,7 +205,7 @@ def _process_game(
     return result
 
 
-def _get_pitcher_profile(pitcher_id: str | None, name: str) -> dict:
+def _get_pitcher_profile(pitcher_id: Optional[str], name: str) -> dict:
     """Get or build a pitcher profile."""
     if not pitcher_id:
         logger.warning("No pitcher ID for %s — using league average", name)
@@ -230,10 +231,10 @@ def _get_pitcher_profile(pitcher_id: str | None, name: str) -> dict:
 
 
 def _get_lineup_profiles(
-    batter_ids: list[str],
+    batter_ids: List[str],
     team_abbrev: str,
     confirmed: bool,
-) -> list[dict]:
+) -> List[dict]:
     """Get batter profiles for a lineup. Falls back to proxy if needed."""
     if not batter_ids and not confirmed:
         # Use proxy lineup
@@ -262,7 +263,7 @@ def _get_lineup_profiles(
     return profiles
 
 
-def _build_odds_lookup(all_odds: list[dict]) -> dict:
+def _build_odds_lookup(all_odds: List[dict]) -> dict:
     """Build a lookup dict from odds data keyed by team names."""
     lookup = {}
     for odds in all_odds:

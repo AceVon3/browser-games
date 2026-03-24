@@ -6,9 +6,10 @@ No email, Slack, or SMS — terminal only.
 """
 
 from datetime import datetime
+from typing import Optional, List
 
 
-def print_report(date_str: str, games: list[dict], pass_version: str = "morning") -> str:
+def print_report(date_str: str, games: List[dict], pass_version: str = "morning") -> str:
     """Format and print the full daily report.
 
     Args:
@@ -56,17 +57,17 @@ def print_report(date_str: str, games: list[dict], pass_version: str = "morning"
     pass_label = "FINAL SIGNALS" if pass_version == "final" else "MORNING SIGNALS"
     lines.append(divider)
     lines.append(
-        f"MLB MODEL — {pass_label}  |  {display_date}  |  {total_games} games"
+        f"MLB MODEL -- {pass_label}  |  {display_date}  |  {total_games} games"
     )
     lines.append(
-        f"Thresholds: ML >= {_get_threshold('ML_EDGE_THRESHOLD', 65)}  ·  "
-        f"RL alert >= {_get_threshold('RL_EDGE_THRESHOLD', 75)}  ·  "
-        f"O/U >= {_get_threshold('OU_EDGE_THRESHOLD', 65)}  ·  "
+        f"Thresholds: ML >= {_get_threshold('ML_EDGE_THRESHOLD', 65)}  |  "
+        f"RL alert >= {_get_threshold('RL_EDGE_THRESHOLD', 75)}  |  "
+        f"O/U >= {_get_threshold('OU_EDGE_THRESHOLD', 65)}  |  "
         f"Value >= +{int(_get_threshold('VALUE_EDGE_MIN', 0.04) * 100)}%"
     )
     lines.append(
-        f"Signals: {len(ml_signals)} ML  ·  {len(rl_alerts)} RL ALERT  ·  "
-        f"{len(ou_signals)} O/U  ·  {len(no_bet_games)} no bet"
+        f"Signals: {len(ml_signals)} ML  |  {len(rl_alerts)} RL ALERT  |  "
+        f"{len(ou_signals)} O/U  |  {len(no_bet_games)} no bet"
     )
     lines.append(divider)
     lines.append("")
@@ -84,7 +85,7 @@ def print_report(date_str: str, games: list[dict], pass_version: str = "morning"
     # No-bet rows (minimal)
     if no_bet_games:
         lines.append(thin_divider)
-        lines.append(f"NO BET — {len(no_bet_games)} games")
+        lines.append(f"NO BET -- {len(no_bet_games)} games")
         lines.append("")
         for g in no_bet_games:
             lines.append(_format_no_bet(g))
@@ -96,14 +97,14 @@ def print_report(date_str: str, games: list[dict], pass_version: str = "morning"
     return report
 
 
-def _format_ml_signal(g: dict) -> list[str]:
+def _format_ml_signal(g: dict) -> List[str]:
     """Format an expanded ML bet signal row."""
     lines = []
 
     # Signal badge
     badges = []
     unconf = " (UNCONFIRMED)" if g.get("unconfirmed") else ""
-    low_conf = " ⚠ LOW CONFIDENCE" if g.get("data_confidence") == "LOW CONFIDENCE" else ""
+    low_conf = " ** LOW CONFIDENCE **" if g.get("data_confidence") == "LOW CONFIDENCE" else ""
 
     badges.append(f"BET ML{unconf}")
     if g.get("rl_alert"):
@@ -121,7 +122,7 @@ def _format_ml_signal(g: dict) -> list[str]:
     away_sp = g.get("away_starter_name", "TBD")
     home_sp = g.get("home_starter_name", "TBD")
     venue = g.get("venue", "")
-    lines.append(f"  {away_sp} vs. {home_sp}  ·  {venue}")
+    lines.append(f"  {away_sp} vs. {home_sp}  |  {venue}")
 
     # Edge score and bullpen
     home_edge = g.get("home_edge_score", 0)
@@ -168,13 +169,13 @@ def _format_ml_signal(g: dict) -> list[str]:
     return lines
 
 
-def _format_ou_signal(g: dict) -> list[str]:
+def _format_ou_signal(g: dict) -> List[str]:
     """Format an expanded O/U bet signal row."""
     lines = []
 
     direction = g.get("ou_signal", "OVER")
     unconf = " (UNCONFIRMED)" if g.get("unconfirmed") else ""
-    low_conf = " ⚠ LOW CONFIDENCE" if g.get("data_confidence") == "LOW CONFIDENCE" else ""
+    low_conf = " ** LOW CONFIDENCE **" if g.get("data_confidence") == "LOW CONFIDENCE" else ""
 
     away = g.get("away_abbrev", g.get("away_team", "???"))
     home = g.get("home_abbrev", g.get("home_team", "???"))
@@ -185,7 +186,7 @@ def _format_ou_signal(g: dict) -> list[str]:
     away_sp = g.get("away_starter_name", "TBD")
     home_sp = g.get("home_starter_name", "TBD")
     venue = g.get("venue", "")
-    lines.append(f"  {away_sp} vs. {home_sp}  ·  {venue}")
+    lines.append(f"  {away_sp} vs. {home_sp}  |  {venue}")
 
     ou_line = g.get("ou_line")
     over_odds = _format_line(g.get("ou_over_odds"))
@@ -218,7 +219,7 @@ def _format_no_bet(g: dict) -> str:
     value_str = f"Value: {value_edge * 100:+.1f}%" if value_edge is not None else "Value: N/A"
 
     return (
-        f"{away} @ {home}  {game_time}  ·  {away_sp} vs. {home_sp}  ·  "
+        f"{away} @ {home}  {game_time}  |  {away_sp} vs. {home_sp}  |"
         f"Edge: {edge:.0f}  O/U: {ou_score:.0f}  {value_str}"
     )
 
@@ -229,12 +230,13 @@ def _format_time(game_time: str) -> str:
         return ""
     try:
         dt = datetime.fromisoformat(game_time.replace("Z", "+00:00"))
-        return dt.strftime("%-I:%M %p ET")
+        # %#I on Windows, %-I on Unix — use lstrip('0') as portable fallback
+        return dt.strftime("%I:%M %p ET").lstrip("0")
     except (ValueError, AttributeError):
         return game_time
 
 
-def _format_line(line: int | None) -> str:
+def _format_line(line: Optional[int]) -> str:
     """Format a moneyline for display."""
     if line is None:
         return "N/A"

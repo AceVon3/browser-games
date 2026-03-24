@@ -7,6 +7,8 @@ Handles LOW CONFIDENCE flagging for players on prior_season or league_avg data.
 
 import os
 import logging
+from typing import Optional, List
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -23,7 +25,7 @@ VALUE_EDGE_MIN = float(os.getenv("VALUE_EDGE_MIN", 0.04))
 # Odds → Implied Probability
 # ---------------------------------------------------------------------------
 
-def moneyline_to_implied_prob(line: int | None) -> float | None:
+def moneyline_to_implied_prob(line: Optional[int]) -> Optional[float]:
     """Convert American moneyline to implied probability."""
     if line is None:
         return None
@@ -70,10 +72,10 @@ def edge_to_win_prob(edge_score: float) -> float:
 def evaluate_side_signal(
     home_edge: float,
     away_edge: float,
-    home_moneyline: int | None,
-    away_moneyline: int | None,
-    home_run_line: int | None = None,
-    away_run_line: int | None = None,
+    home_moneyline: Optional[int],
+    away_moneyline: Optional[int],
+    home_run_line: Optional[int] = None,
+    away_run_line: Optional[int] = None,
 ) -> dict:
     """Evaluate moneyline and run line signals.
 
@@ -161,9 +163,9 @@ def evaluate_side_signal(
 def evaluate_ou_signal(
     ou_score: float,
     model_total: float,
-    ou_line: float | None,
-    ou_over_odds: int | None,
-    ou_under_odds: int | None,
+    ou_line: Optional[float],
+    ou_over_odds: Optional[int],
+    ou_under_odds: Optional[int],
 ) -> dict:
     """Evaluate over/under signal.
 
@@ -231,8 +233,8 @@ def evaluate_ou_signal(
 def check_confidence(
     home_pitcher: dict,
     away_pitcher: dict,
-    home_lineup: list[dict],
-    away_lineup: list[dict],
+    home_lineup: List[dict],
+    away_lineup: List[dict],
 ) -> str:
     """Check data confidence for a game.
 
