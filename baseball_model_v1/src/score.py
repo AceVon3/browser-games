@@ -200,8 +200,8 @@ def calculate_edge_score(pitcher: dict, lineup: List[dict]) -> dict:
     """Calculate the raw 4-component edge score for a pitcher vs lineup.
 
     Returns dict with component scores and raw total.
-    Raw Edge Score range: -40 to 100.
-    Positive = pitching team advantage.
+    Raw Edge Score range: 0 to 100.
+    Higher = pitching team advantage.
     """
     zone = zone_alignment_score(pitcher, lineup)
     pitch = pitch_type_mismatch_score(pitcher, lineup)
@@ -210,7 +210,7 @@ def calculate_edge_score(pitcher: dict, lineup: List[dict]) -> dict:
 
     raw = zone + pitch + walk + hand
     # Clamp to spec range
-    raw = max(-40, min(100, raw))
+    raw = max(0, min(100, raw))
 
     return {
         "zone_alignment": zone,
@@ -334,24 +334,33 @@ def calculate_ou(
     # Use the average of both edge scores as a combined pitcher dominance measure
     avg_edge = (home_edge + away_edge) / 2
 
-    # Model total
+    # Model total — 50 is neutral; above 50 = dominant pitching (fewer runs),
+    # below 50 = weak pitching (more runs)
     model_total = 9.0
-    model_total -= (avg_edge / 100) * 2.5
+    model_total -= ((avg_edge - 50) / 50) * 2.5
     model_total += (park_factor - 1.0) * 3.0
     model_total += weather_adj.get("run_adj", 0.0)
 
     avg_bullpen = (home_bullpen_score + away_bullpen_score) / 2
+    # Linear bullpen adjustment: 70+ = -0.5, 50 = 0, 30- = +0.5
     if avg_bullpen >= 70:
         model_total -= 0.5
-    elif avg_bullpen < 50:
+    elif avg_bullpen <= 30:
         model_total += 0.5
+    else:
+        # Linear between 30 and 70 (midpoint 50 = 0)
+        model_total += ((50 - avg_bullpen) / 40) * 0.5
+
+    # Spread bonus for lopsided pitching matchups
+    spread = abs(home_edge - away_edge)
+    model_total += (spread / 50) * 0.3  # max +0.3 runs for a 50-pt gap
 
     # O/U Score (baseline 50, always applied)
     ou_score = 50.0
 
     # Edge score factor: -20 to +20
-    # Edge 100 = -20 (strong UNDER), Edge 0 = 0, Edge -40 = +16 (OVER lean)
-    edge_factor = -(avg_edge / 100) * 20
+    # Edge 100 = -20 (strong UNDER), Edge 50 = 0 (neutral), Edge 0 = +20 (OVER lean)
+    edge_factor = -((avg_edge - 50) / 50) * 20
     ou_score += edge_factor
 
     # Park factor: -10 to +10
@@ -371,21 +380,19 @@ def calculate_ou(
     elif avg_bullpen < 50:
         bp_ou = 10
     else:
-        bp_ou = -((avg_bullpen - 50) / 20) * 20 - 0  # linear scale 50→70 maps to 10→-10
         bp_ou = 10 - ((avg_bullpen - 50) / 20) * 20
     ou_score += bp_ou
 
-    # Temperature: -5 to +3
-    temp = weather_adj.get("run_adj", 0.0)
-    # Already captured in wind_adj above; use raw temp from edge_adj logic
-    # Temperature component handled separately based on actual temp
-    # (weather_adj doesn't carry temp directly, so we use edge_adj as proxy)
+    # Lopsided pitching spread bonus: 0 to +5 OVER
+    # When one pitcher is much weaker, run scoring is right-skewed —
+    # bad pitchers give up crooked innings (unbounded upside) while
+    # good pitchers can only suppress to 0 (bounded floor).
+    spread = abs(home_edge - away_edge)
+    spread_bonus = (spread / 50) * 5  # max +5 for a 50-pt gap
+    ou_score += spread_bonus
 
-    # Pitcher convergence boost: when both pitchers land in the same range,
-    # it's more predictive for totals than the average alone.
-    # Both dominant → pitchers' duel (UNDER).
-    # OVER boost removed — backtested at only 52.3% on 845 games (no edge).
-    # UNDER boost kept — backtested at 62.5% (small sample but directional).
+    # Pitcher convergence boost (UNDER only):
+    # Both dominant → pitchers' duel. Backtested at 62.5%.
     convergence_boost = 0.0
     low_edge = min(home_edge, away_edge)
     high_edge = max(home_edge, away_edge)

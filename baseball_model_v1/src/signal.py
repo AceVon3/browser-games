@@ -136,6 +136,19 @@ def evaluate_side_signal(
         rl = home_run_line
         inverted = True
     else:
+        # No side qualifies — compute value for the stronger side for display
+        if home_edge >= away_edge and home_moneyline is not None:
+            result["bet_side"] = "HOME"
+            result["model_win_prob"] = edge_to_win_prob(home_edge)
+            result["line_win_prob"] = moneyline_to_implied_prob(home_moneyline)
+            if result["line_win_prob"] is not None:
+                result["value_edge"] = round(result["model_win_prob"] - result["line_win_prob"], 4)
+        elif away_moneyline is not None:
+            result["bet_side"] = "AWAY"
+            result["model_win_prob"] = edge_to_win_prob(away_edge)
+            result["line_win_prob"] = moneyline_to_implied_prob(away_moneyline)
+            if result["line_win_prob"] is not None:
+                result["value_edge"] = round(result["model_win_prob"] - result["line_win_prob"], 4)
         return result
 
     # For inverted signals, use a separate win prob mapping:
