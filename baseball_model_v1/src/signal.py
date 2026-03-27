@@ -18,6 +18,7 @@ logger = logging.getLogger("pipeline")
 ML_EDGE_THRESHOLD = int(os.getenv("ML_EDGE_THRESHOLD", 65))
 RL_EDGE_THRESHOLD = int(os.getenv("RL_EDGE_THRESHOLD", 75))
 OU_EDGE_THRESHOLD = int(os.getenv("OU_EDGE_THRESHOLD", 65))
+DIFF_EDGE_THRESHOLD = int(os.getenv("DIFF_EDGE_THRESHOLD", 12))
 VALUE_EDGE_MIN = float(os.getenv("VALUE_EDGE_MIN", 0.04))
 
 
@@ -210,6 +211,80 @@ def evaluate_side_signal(
     return result
 
 
+def diff_to_win_prob(diff: float) -> float:
+    """Convert edge score differential to estimated win probability.
+
+    The differential captures a compounding advantage: one side's pitcher
+    handles the opposing lineup better AND their lineup handles the opposing
+    pitcher better. Conservative mapping:
+        diff 12 → ~53.5%
+        diff 16 → ~55%
+        diff 20 → ~56.5%
+        diff 30 → ~60%
+    """
+    prob = 0.50 + (diff / 80) * 0.20
+    return max(0.50, min(0.70, round(prob, 4)))
+
+
+def evaluate_diff_signal(
+    home_edge: float,
+    away_edge: float,
+    home_moneyline: Optional[int],
+    away_moneyline: Optional[int],
+) -> dict:
+    """Evaluate differential signal when neither side hits ML threshold.
+
+    Fires when the gap between the two edge scores is >= DIFF_EDGE_THRESHOLD,
+    indicating one side has a compounding advantage on both sides of the ball.
+    Only fires if no standard ML/inverted signal already triggered.
+
+    Returns dict with diff signal details.
+    """
+    result = {
+        "diff_signal": "NO BET",
+        "diff_side": None,
+        "diff_gap": None,
+        "diff_model_prob": None,
+        "diff_line_prob": None,
+        "diff_value_edge": None,
+        "diff_unconfirmed": False,
+    }
+
+    diff = abs(home_edge - away_edge)
+    result["diff_gap"] = round(diff, 1)
+
+    if diff < DIFF_EDGE_THRESHOLD:
+        return result
+
+    # Bet the side whose pitcher has the higher edge score
+    if home_edge > away_edge:
+        bet_side = "HOME"
+        ml = home_moneyline
+    else:
+        bet_side = "AWAY"
+        ml = away_moneyline
+
+    model_prob = diff_to_win_prob(diff)
+    line_prob = moneyline_to_implied_prob(ml)
+
+    result["diff_side"] = bet_side
+    result["diff_model_prob"] = model_prob
+    result["diff_line_prob"] = line_prob
+
+    if line_prob is not None:
+        value_edge = model_prob - line_prob
+        result["diff_value_edge"] = round(value_edge, 4)
+
+        if value_edge >= VALUE_EDGE_MIN:
+            result["diff_signal"] = bet_side
+    else:
+        # No odds — show as unconfirmed
+        result["diff_signal"] = bet_side
+        result["diff_unconfirmed"] = True
+
+    return result
+
+
 def evaluate_ou_signal(
     ou_score: float,
     model_total: float,
@@ -329,6 +404,18 @@ def evaluate_game(game_scoring: dict, odds: dict, players: dict) -> dict:
         away_run_line=odds.get("away_run_line"),
     )
 
+    # Differential signal — only when standard side signal didn't fire
+    diff = {"diff_signal": "NO BET", "diff_side": None, "diff_gap": None,
+            "diff_model_prob": None, "diff_line_prob": None,
+            "diff_value_edge": None, "diff_unconfirmed": False}
+    if side.get("bet_signal") in (None, "NO BET"):
+        diff = evaluate_diff_signal(
+            home_edge=game_scoring["home_edge_score"],
+            away_edge=game_scoring["away_edge_score"],
+            home_moneyline=odds.get("home_moneyline"),
+            away_moneyline=odds.get("away_moneyline"),
+        )
+
     ou = evaluate_ou_signal(
         ou_score=game_scoring["ou_score"],
         model_total=game_scoring["ou_model_total"],
@@ -346,6 +433,7 @@ def evaluate_game(game_scoring: dict, odds: dict, players: dict) -> dict:
 
     return {
         **side,
+        **diff,
         **ou,
         "data_confidence": confidence,
     }

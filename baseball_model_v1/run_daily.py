@@ -111,6 +111,8 @@ def morning_pass(date_str: Optional[str] = None):
             log_signal(g, "ML", pass_version="morning")
             if g.get("rl_alert"):
                 log_signal(g, "RL_ALERT", pass_version="morning")
+        if g.get("diff_signal") not in (None, "NO BET"):
+            log_signal(g, "ML_DIFF", pass_version="morning")
         if g.get("ou_signal") not in (None, "NO BET"):
             log_signal(g, g["ou_signal"], pass_version="morning")
 

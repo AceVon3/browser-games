@@ -33,6 +33,7 @@ def print_report(date_str: str, games: List[dict], pass_version: str = "morning"
     ml_signals = []
     rl_alerts = []
     rl_plus_signals = []
+    diff_signals = []
     ou_signals = []
     no_bet_games = []
 
@@ -45,6 +46,9 @@ def print_report(date_str: str, games: List[dict], pass_version: str = "morning"
             rl_alerts.append(g)
         if g.get("rl_plus_signal") not in (None, "NO BET"):
             rl_plus_signals.append(g)
+            has_signal = True
+        if g.get("diff_signal") not in (None, "NO BET"):
+            diff_signals.append(g)
             has_signal = True
         if g.get("ou_signal") not in (None, "NO BET"):
             ou_signals.append(g)
@@ -70,7 +74,8 @@ def print_report(date_str: str, games: List[dict], pass_version: str = "morning"
         f"Value >= +{int(_get_threshold('VALUE_EDGE_MIN', 0.04) * 100)}%"
     )
     lines.append(
-        f"Signals: {len(ml_signals)} ML  |  {len(rl_plus_signals)} RL+1.5  |  "
+        f"Signals: {len(ml_signals)} ML  |  {len(diff_signals)} DIFF  |  "
+        f"{len(rl_plus_signals)} RL+1.5  |  "
         f"{len(rl_alerts)} RL ALERT  |  "
         f"{len(ou_signals)} O/U  |  {len(no_bet_games)} no bet"
     )
@@ -86,6 +91,10 @@ def print_report(date_str: str, games: List[dict], pass_version: str = "morning"
         if g not in ml_signals:  # avoid double printing games already shown as ML
             lines.extend(_format_rl_plus_signal(g))
             lines.append("")
+
+    for g in diff_signals:
+        lines.extend(_format_diff_signal(g))
+        lines.append("")
 
     for g in ou_signals:
         if g not in ml_signals:  # avoid double printing
@@ -243,6 +252,63 @@ def _format_rl_plus_signal(g: dict) -> List[str]:
     return lines
 
 
+def _format_diff_signal(g: dict) -> List[str]:
+    """Format an expanded differential bet signal row."""
+    lines = []
+
+    unconf = " (UNCONFIRMED)" if g.get("diff_unconfirmed") else ""
+    low_conf = " ** LOW CONFIDENCE **" if g.get("data_confidence") == "LOW CONFIDENCE" else ""
+
+    away = g.get("away_abbrev", g.get("away_team", "???"))
+    home = g.get("home_abbrev", g.get("home_team", "???"))
+    game_time = _format_time(g.get("game_time", ""))
+
+    diff_side = g.get("diff_side", "")
+    if diff_side == "HOME":
+        bet_team = home
+        ml = g.get("home_moneyline")
+    else:
+        bet_team = away
+        ml = g.get("away_moneyline")
+
+    lines.append(f"[BET ML DIFF{unconf}]{low_conf} {away} @ {home}  {game_time}")
+
+    away_sp = g.get("away_starter_name", "TBD")
+    home_sp = g.get("home_starter_name", "TBD")
+    venue = g.get("venue", "")
+    lines.append(f"  {away_sp} vs. {home_sp}  |  {venue}")
+
+    home_edge = g.get("home_edge_score", 0)
+    away_edge = g.get("away_edge_score", 0)
+    diff_gap = g.get("diff_gap", 0)
+    lines.append(
+        f"  Edge scores:    {away} {away_edge:.0f} / {home} {home_edge:.0f}  |  "
+        f"Gap: {diff_gap:.0f} pts favoring {bet_team}"
+    )
+
+    home_bp = g.get("home_bullpen_score", 0)
+    away_bp = g.get("away_bullpen_score", 0)
+    lines.append(
+        f"  Bullpen:        {home} {home_bp:.0f}  {away} {away_bp:.0f}"
+    )
+
+    ml_str = _format_line(ml)
+    lines.append(f"  Moneyline:      {bet_team} {ml_str}")
+
+    diff_line_prob = g.get("diff_line_prob")
+    diff_model_prob = g.get("diff_model_prob")
+    diff_value_edge = g.get("diff_value_edge")
+
+    if diff_line_prob is not None:
+        lines.append(f"  Line implied:   {diff_line_prob * 100:.1f}%")
+    if diff_model_prob is not None:
+        lines.append(f"  Model prob:     {diff_model_prob * 100:.1f}%")
+    if diff_value_edge is not None:
+        lines.append(f"  Value edge:     {diff_value_edge * 100:+.1f}%")
+
+    return lines
+
+
 def _format_ou_signal(g: dict) -> List[str]:
     """Format an expanded O/U bet signal row."""
     lines = []
@@ -273,6 +339,12 @@ def _format_ou_signal(g: dict) -> List[str]:
 
     lines.append(f"  Model total:    {model_total:.1f}")
     lines.append(f"  O/U score:      {ou_score:.0f}")
+
+    convergence = g.get("ou_convergence_boost", 0)
+    if convergence != 0:
+        label = "OVER" if convergence > 0 else "UNDER"
+        lines.append(f"  Convergence:    {convergence:+.0f} pts ({label} — both pitchers {'weak' if convergence > 0 else 'dominant'})")
+
     if ou_value is not None:
         lines.append(f"  Value edge:     {ou_value * 100:+.1f}%")
 
@@ -287,14 +359,15 @@ def _format_no_bet(g: dict) -> str:
     away_sp = g.get("away_starter_name", "TBD")
     home_sp = g.get("home_starter_name", "TBD")
 
-    edge = max(g.get("home_edge_score", 0), g.get("away_edge_score", 0))
+    home_edge = g.get("home_edge_score", 0)
+    away_edge = g.get("away_edge_score", 0)
     ou_score = g.get("ou_score", 50)
     value_edge = g.get("value_edge")
     value_str = f"Value: {value_edge * 100:+.1f}%" if value_edge is not None else "Value: N/A"
 
     return (
         f"{away} @ {home}  {game_time}  |  {away_sp} vs. {home_sp}  |"
-        f"Edge: {edge:.0f}  O/U: {ou_score:.0f}  {value_str}"
+        f"Edge: {away} {away_edge:.0f} / {home} {home_edge:.0f}  O/U: {ou_score:.0f}  {value_str}"
     )
 
 
