@@ -301,6 +301,8 @@ def _match_odds(game: dict, odds_lookup: dict) -> dict:
         "away_moneyline": odds.get("away_moneyline"),
         "home_run_line": odds.get("home_run_line"),
         "away_run_line": odds.get("away_run_line"),
+        "home_spread_point": odds.get("home_spread_point"),
+        "away_spread_point": odds.get("away_spread_point"),
         "ou_line": odds.get("ou_line"),
         "ou_over_odds": odds.get("ou_over_odds"),
         "ou_under_odds": odds.get("ou_under_odds"),

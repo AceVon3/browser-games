@@ -427,6 +427,7 @@ def _backtest_game(
     odds = {
         "home_moneyline": None, "away_moneyline": None,
         "home_run_line": None, "away_run_line": None,
+        "home_spread_point": None, "away_spread_point": None,
         "ou_line": None, "ou_over_odds": None, "ou_under_odds": None,
     }
     players = {

@@ -295,6 +295,8 @@ def _parse_odds_response(data: list[dict]) -> List[dict]:
             "away_moneyline": None,
             "home_run_line": None,
             "away_run_line": None,
+            "home_spread_point": None,
+            "away_spread_point": None,
             "ou_line": None,
             "ou_over_odds": None,
             "ou_under_odds": None,
@@ -318,6 +320,8 @@ def _parse_odds_response(data: list[dict]) -> List[dict]:
                     if parsed["home_run_line"] is None:
                         parsed["home_run_line"] = home.get("price")
                         parsed["away_run_line"] = away.get("price")
+                        parsed["home_spread_point"] = home.get("point")
+                        parsed["away_spread_point"] = away.get("point")
 
                 elif key == "totals":
                     over = outcomes.get("Over", {})

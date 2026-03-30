@@ -77,6 +77,8 @@ def evaluate_side_signal(
     away_moneyline: Optional[int],
     home_run_line: Optional[int] = None,
     away_run_line: Optional[int] = None,
+    home_spread_point: Optional[float] = None,
+    away_spread_point: Optional[float] = None,
 ) -> dict:
     """Evaluate moneyline and run line signals.
 
@@ -111,29 +113,43 @@ def evaluate_side_signal(
     #      edge 25 → inverted 0 (barely qualifies), edge 0 → inverted 25 (max)
     inverted = False
 
+    # Helper: resolve the +1.5 run line price for a given side.
+    # The Odds API always puts -1.5 on the favorite and +1.5 on the underdog.
+    # If our bet side is the underdog (spread_point > 0), their price IS the
+    # +1.5 price.  If our bet side is the favorite (spread_point < 0), the
+    # +1.5 price for them doesn't exist in the API — set to None so the
+    # +1.5 signal won't fire (favorites on +1.5 have no real market).
+    def _resolve_rl_plus(side: str) -> Optional[int]:
+        if side == "HOME":
+            pt = home_spread_point
+            return home_run_line if pt is not None and pt > 0 else None
+        else:
+            pt = away_spread_point
+            return away_run_line if pt is not None and pt > 0 else None
+
     if home_edge >= ML_EDGE_THRESHOLD:
         bet_side = "HOME"
         edge = home_edge
         ml = home_moneyline
-        rl = home_run_line
+        rl = _resolve_rl_plus("HOME")
     elif away_edge >= ML_EDGE_THRESHOLD:
         bet_side = "AWAY"
         edge = away_edge
         ml = away_moneyline
-        rl = away_run_line
+        rl = _resolve_rl_plus("AWAY")
     elif home_edge <= 25:
         # Home pitcher getting crushed → bet AWAY
         bet_side = "AWAY"
         edge = 25 - home_edge  # invert: lower score = stronger signal
         ml = away_moneyline
-        rl = away_run_line
+        rl = _resolve_rl_plus("AWAY")
         inverted = True
     elif away_edge <= 25:
         # Away pitcher getting crushed → bet HOME
         bet_side = "HOME"
         edge = 25 - away_edge
         ml = home_moneyline
-        rl = home_run_line
+        rl = _resolve_rl_plus("HOME")
         inverted = True
     else:
         # No side qualifies — compute value for the stronger side for display
@@ -415,6 +431,8 @@ def evaluate_game(game_scoring: dict, odds: dict, players: dict) -> dict:
         away_moneyline=odds.get("away_moneyline"),
         home_run_line=odds.get("home_run_line"),
         away_run_line=odds.get("away_run_line"),
+        home_spread_point=odds.get("home_spread_point"),
+        away_spread_point=odds.get("away_spread_point"),
     )
 
     # Differential signal — only when standard side signal didn't fire
