@@ -27,7 +27,7 @@ VALUE_EDGE_MIN = float(os.getenv("VALUE_EDGE_MIN", 0.04))
 # ---------------------------------------------------------------------------
 
 def moneyline_to_implied_prob(line: Optional[int]) -> Optional[float]:
-    """Convert American moneyline to implied probability."""
+    """Convert American moneyline to implied probability (includes vig)."""
     if line is None:
         return None
     if line < 0:
@@ -35,6 +35,23 @@ def moneyline_to_implied_prob(line: Optional[int]) -> Optional[float]:
     elif line > 0:
         return 100 / (line + 100)
     return 0.5  # even money
+
+
+def no_vig_prob(line: Optional[int], opponent_line: Optional[int]) -> Optional[float]:
+    """Convert American moneyline to vig-free implied probability.
+
+    Takes both sides of the market, sums their raw implied probs, and
+    normalizes so they add to 100%.  Example: -110 / -110 raw implies
+    52.38% each (104.76% total).  After vig removal → 50% each.
+    """
+    raw = moneyline_to_implied_prob(line)
+    raw_opp = moneyline_to_implied_prob(opponent_line)
+    if raw is None or raw_opp is None:
+        return raw  # fall back to raw if opponent line unavailable
+    total = raw + raw_opp
+    if total == 0:
+        return raw
+    return round(raw / total, 4)
 
 
 def implied_prob_to_moneyline(prob: float) -> int:
@@ -131,17 +148,20 @@ def evaluate_side_signal(
         bet_side = "HOME"
         edge = home_edge
         ml = home_moneyline
+        ml_opp = away_moneyline
         rl = _resolve_rl_plus("HOME")
     elif away_edge >= ML_EDGE_THRESHOLD:
         bet_side = "AWAY"
         edge = away_edge
         ml = away_moneyline
+        ml_opp = home_moneyline
         rl = _resolve_rl_plus("AWAY")
     elif home_edge <= 25:
         # Home pitcher getting crushed → bet AWAY
         bet_side = "AWAY"
         edge = 25 - home_edge  # invert: lower score = stronger signal
         ml = away_moneyline
+        ml_opp = home_moneyline
         rl = _resolve_rl_plus("AWAY")
         inverted = True
     elif away_edge <= 25:
@@ -149,6 +169,7 @@ def evaluate_side_signal(
         bet_side = "HOME"
         edge = 25 - away_edge
         ml = home_moneyline
+        ml_opp = away_moneyline
         rl = _resolve_rl_plus("HOME")
         inverted = True
     else:
@@ -156,13 +177,13 @@ def evaluate_side_signal(
         if home_edge >= away_edge and home_moneyline is not None:
             result["bet_side"] = "HOME"
             result["model_win_prob"] = edge_to_win_prob(home_edge)
-            result["line_win_prob"] = moneyline_to_implied_prob(home_moneyline)
+            result["line_win_prob"] = no_vig_prob(home_moneyline, away_moneyline)
             if result["line_win_prob"] is not None:
                 result["value_edge"] = round(result["model_win_prob"] - result["line_win_prob"], 4)
         elif away_moneyline is not None:
             result["bet_side"] = "AWAY"
             result["model_win_prob"] = edge_to_win_prob(away_edge)
-            result["line_win_prob"] = moneyline_to_implied_prob(away_moneyline)
+            result["line_win_prob"] = no_vig_prob(away_moneyline, home_moneyline)
             if result["line_win_prob"] is not None:
                 result["value_edge"] = round(result["model_win_prob"] - result["line_win_prob"], 4)
         return result
@@ -175,7 +196,7 @@ def evaluate_side_signal(
     else:
         model_prob = edge_to_win_prob(edge)
 
-    line_prob = moneyline_to_implied_prob(ml)
+    line_prob = no_vig_prob(ml, ml_opp)
 
     result["model_win_prob"] = model_prob
     result["line_win_prob"] = line_prob
@@ -225,7 +246,9 @@ def evaluate_side_signal(
     if model_prob is not None and rl is not None:
         rl_plus_prob = model_prob + ((1 - model_prob) * ONE_RUN_LOSS_RATE)
         rl_plus_prob = max(0.10, min(0.95, round(rl_plus_prob, 4)))
-        rl_line_prob = moneyline_to_implied_prob(rl)
+        # Opponent's run line is the other side of the spread market
+        rl_opp = away_run_line if bet_side == "HOME" else home_run_line
+        rl_line_prob = no_vig_prob(rl, rl_opp)
 
         result["rl_plus_prob"] = rl_plus_prob
         result["rl_plus_line_prob"] = rl_line_prob
@@ -289,12 +312,14 @@ def evaluate_diff_signal(
     if home_edge > away_edge:
         bet_side = "HOME"
         ml = home_moneyline
+        ml_opp = away_moneyline
     else:
         bet_side = "AWAY"
         ml = away_moneyline
+        ml_opp = home_moneyline
 
     model_prob = diff_to_win_prob(diff)
-    line_prob = moneyline_to_implied_prob(ml)
+    line_prob = no_vig_prob(ml, ml_opp)
 
     result["diff_side"] = bet_side
     result["diff_model_prob"] = model_prob
@@ -353,7 +378,9 @@ def evaluate_ou_signal(
 
     # Calculate value edge
     if ou_odds is not None:
-        book_prob = moneyline_to_implied_prob(ou_odds)
+        # Remove vig: over and under are opposing sides of the same market
+        ou_odds_opp = ou_under_odds if direction == "OVER" else ou_over_odds
+        book_prob = no_vig_prob(ou_odds, ou_odds_opp)
         # Model probability: how far model total diverges from line
         diff = abs(model_total - ou_line)
         # Rough probability estimate from total difference
