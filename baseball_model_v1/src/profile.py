@@ -79,6 +79,11 @@ def blend_profiles(prior: dict, current: dict, sample_size: int) -> dict:
         elif isinstance(c_val, dict) and isinstance(p_val, dict):
             # Blend nested dicts (pitch_mix, zone_map, splits)
             blended[key] = _blend_dict(p_val, c_val, sample_size)
+        elif isinstance(c_val, list) and isinstance(p_val, list):
+            # For list fields (e.g. preferred_hit_zones, vulnerable_zones),
+            # prefer non-empty list so prior season data isn't lost to a
+            # thin current-season sample that couldn't generate zones.
+            blended[key] = c_val if c_val else p_val
         else:
             blended[key] = c_val if c_val is not None else p_val
 
