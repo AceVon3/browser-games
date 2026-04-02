@@ -285,7 +285,10 @@ def score_matchup(
     home_bp_mod = calculate_bullpen_modifier(home_bullpen_score, away_bullpen_score)
     away_bp_mod = calculate_bullpen_modifier(away_bullpen_score, home_bullpen_score)
 
-    home_final = round(home_weather_adj + home_bp_mod, 2)
+    # Home field advantage: +3 to home edge based on 2025 backtest
+    # showing home-side bets at 57% vs away-side at 47-49%
+    HOME_FIELD_ADJ = 3
+    home_final = round(home_weather_adj + home_bp_mod + HOME_FIELD_ADJ, 2)
     away_final = round(away_weather_adj + away_bp_mod, 2)
 
     # O/U scoring
