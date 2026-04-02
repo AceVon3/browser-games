@@ -122,10 +122,8 @@ def build_pitcher_profile(
 ) -> Optional[dict]:
     """Build a pitcher profile from Statcast data.
 
-    Fetches current season data first. If sample size is under 200 pitches,
-    also fetches the prior season to build a proper blended profile.
-
-    Returns profile dict or None if no data available.
+    Fetches current season data and blends with the raw prior-season
+    baseline (stored separately so blending never compounds on itself).
     """
     if start_dt is None:
         start_dt = f"{CURRENT_SEASON}-03-01"
@@ -133,12 +131,12 @@ def build_pitcher_profile(
         end_dt = date.today().isoformat()
 
     df = fetch_statcast_pitcher(pitcher_id, start_dt, end_dt)
-
-    # If current season data is thin (< 200 pitches), fetch prior season
     current_pitches = len(df) if df is not None and not df.empty else 0
-    prior_profile = load_cached_profile("pitchers", str(pitcher_id))
 
-    if current_pitches < 200 and prior_profile is None:
+    # Always load/build the raw prior-season baseline for clean blending.
+    # Stored in pitchers_prior/ so it never gets overwritten by blended data.
+    prior_profile = load_cached_profile("pitchers_prior", str(pitcher_id))
+    if prior_profile is None:
         prior_year = CURRENT_SEASON - 1
         logger.info("Fetching %d prior season data for pitcher %s (%s)",
                      prior_year, pitcher_id, name)
@@ -150,6 +148,7 @@ def build_pitcher_profile(
         if prior_df is not None and not prior_df.empty:
             prior_profile = _aggregate_pitcher_data(prior_df, pitcher_id, name)
             prior_profile["data_source"] = "prior_season"
+            save_cached_profile("pitchers_prior", str(pitcher_id), prior_profile)
             logger.info("  Prior season: %d pitches for %s",
                          prior_profile["sample_size"], name)
 
@@ -157,7 +156,6 @@ def build_pitcher_profile(
         return None
 
     if df is None or df.empty:
-        # Only prior season data available
         if prior_profile:
             save_cached_profile("pitchers", str(pitcher_id), prior_profile)
             return prior_profile
@@ -165,7 +163,7 @@ def build_pitcher_profile(
 
     profile = _aggregate_pitcher_data(df, pitcher_id, name)
 
-    # Blend with prior season if available
+    # Blend current against the raw prior baseline (never a previous blend)
     if prior_profile:
         sample_size = profile.get("sample_size", 0)
         profile = blend_profiles(prior_profile, profile, sample_size)
@@ -343,8 +341,8 @@ def build_batter_profile(
 ) -> Optional[dict]:
     """Build a batter profile from Statcast data.
 
-    Fetches current season data first. If sample size is under 200 pitches seen,
-    also fetches the prior season to build a proper blended profile.
+    Fetches current season data and blends with the raw prior-season
+    baseline (stored separately so blending never compounds on itself).
     """
     if start_dt is None:
         start_dt = f"{CURRENT_SEASON}-03-01"
@@ -352,12 +350,12 @@ def build_batter_profile(
         end_dt = date.today().isoformat()
 
     df = fetch_statcast_batter(batter_id, start_dt, end_dt)
-
-    # If current season data is thin, fetch prior season
     current_pitches = len(df) if df is not None and not df.empty else 0
-    prior_profile = load_cached_profile("batters", str(batter_id))
 
-    if current_pitches < 200 and prior_profile is None:
+    # Always load/build the raw prior-season baseline for clean blending.
+    # Stored in batters_prior/ so it never gets overwritten by blended data.
+    prior_profile = load_cached_profile("batters_prior", str(batter_id))
+    if prior_profile is None:
         prior_year = CURRENT_SEASON - 1
         logger.info("Fetching %d prior season data for batter %s",
                      prior_year, batter_id)
@@ -369,6 +367,7 @@ def build_batter_profile(
         if prior_df is not None and not prior_df.empty:
             prior_profile = _aggregate_batter_data(prior_df, batter_id, name)
             prior_profile["data_source"] = "prior_season"
+            save_cached_profile("batters_prior", str(batter_id), prior_profile)
             logger.info("  Prior season: %d PA for batter %s",
                          prior_profile["sample_size"], batter_id)
 
@@ -383,7 +382,7 @@ def build_batter_profile(
 
     profile = _aggregate_batter_data(df, batter_id, name)
 
-    # Blend with prior season if available
+    # Blend current against the raw prior baseline (never a previous blend)
     if prior_profile:
         sample_size = profile.get("sample_size", 0)
         profile = blend_profiles(prior_profile, profile, sample_size)
