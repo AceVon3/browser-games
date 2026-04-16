@@ -1,0 +1,19 @@
+{
+  "batter_id": "657193",
+  "name": "",
+  "hand": "L",
+  "zone_hot_spots": {},
+  "zone_cold_spots": {},
+  "preferred_hit_zones": [],
+  "vulnerable_zones": [],
+  "pitch_type_perf": {},
+  "best_pitch_type": "",
+  "worst_pitch_type": "",
+  "bb_pct": 0.125,
+  "k_pct": 0.5,
+  "chase_rate": 0.5,
+  "contact_rate": 0.3548,
+  "sample_size": 24,
+  "last_updated": "2026-04-14",
+  "data_source": "backtest_prior_season"
+}

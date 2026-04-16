@@ -16,7 +16,8 @@ load_dotenv()
 logger = logging.getLogger("pipeline")
 
 ML_EDGE_THRESHOLD = int(os.getenv("ML_EDGE_THRESHOLD", 65))
-OU_EDGE_THRESHOLD = int(os.getenv("OU_EDGE_THRESHOLD", 65))
+OU_EDGE_THRESHOLD = int(os.getenv("OU_EDGE_THRESHOLD", 58))
+OU_OVER_ENABLED = os.getenv("OU_OVER_ENABLED", "false").lower() == "true"
 DIFF_EDGE_THRESHOLD = int(os.getenv("DIFF_EDGE_THRESHOLD", 12))
 VALUE_EDGE_MIN = float(os.getenv("VALUE_EDGE_MIN", 0.04))
 
@@ -308,8 +309,11 @@ def evaluate_ou_signal(
 
     if ou_line is None:
         if ou_strength >= ou_threshold_strength:
-            result["ou_signal"] = "OVER" if ou_score >= 50 else "UNDER"
-            result["ou_direction"] = result["ou_signal"]
+            direction = "OVER" if ou_score >= 50 else "UNDER"
+            if direction == "OVER" and not OU_OVER_ENABLED:
+                return result  # OVERs disabled — live tracking only
+            result["ou_signal"] = direction
+            result["ou_direction"] = direction
             result["unconfirmed"] = True
         return result
 
@@ -320,6 +324,11 @@ def evaluate_ou_signal(
     else:
         direction = "UNDER"
         ou_odds = ou_under_odds
+
+    # Block OVER signals unless enabled
+    if direction == "OVER" and not OU_OVER_ENABLED:
+        result["ou_direction"] = direction
+        return result
 
     result["ou_direction"] = direction
 

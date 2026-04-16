@@ -1,0 +1,21 @@
+{
+  "batter_id": "644433",
+  "name": "",
+  "hand": "R",
+  "zone_hot_spots": {},
+  "zone_cold_spots": {},
+  "preferred_hit_zones": [],
+  "vulnerable_zones": [],
+  "pitch_type_perf": {
+    "FF": 0.3071
+  },
+  "best_pitch_type": "FF",
+  "worst_pitch_type": "FF",
+  "bb_pct": 0.0,
+  "k_pct": 0.4375,
+  "chase_rate": 0.4286,
+  "contact_rate": 0.7429,
+  "sample_size": 16,
+  "last_updated": "2026-04-14",
+  "data_source": "backtest_prior_season"
+}

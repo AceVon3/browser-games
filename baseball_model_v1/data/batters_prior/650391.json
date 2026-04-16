@@ -1,0 +1,19 @@
+{
+  "batter_id": "650391",
+  "name": "",
+  "hand": "R",
+  "zone_hot_spots": {},
+  "zone_cold_spots": {},
+  "preferred_hit_zones": [],
+  "vulnerable_zones": [],
+  "pitch_type_perf": {},
+  "best_pitch_type": "",
+  "worst_pitch_type": "",
+  "bb_pct": 0.0,
+  "k_pct": 0.3333,
+  "chase_rate": 0.5,
+  "contact_rate": 0.75,
+  "sample_size": 3,
+  "last_updated": "2026-04-14",
+  "data_source": "prior_season"
+}

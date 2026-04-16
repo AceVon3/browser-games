@@ -263,6 +263,10 @@ def score_matchup(
     away_bullpen_score: float,
     park_factor: float,
     weather: dict,
+    home_offense_score: float = 50.0,
+    away_offense_score: float = 50.0,
+    home_bp_workload: float = 0.0,
+    away_bp_workload: float = 0.0,
 ) -> dict:
     """Score a full game matchup.
 
@@ -298,6 +302,8 @@ def score_matchup(
         home_final, away_final,
         park_factor, weather_adj,
         home_bullpen_score, away_bullpen_score,
+        home_offense_score, away_offense_score,
+        home_bp_workload, away_bp_workload,
     )
 
     return {
@@ -331,6 +337,10 @@ def calculate_ou(
     weather_adj: dict,
     home_bullpen_score: float,
     away_bullpen_score: float,
+    home_offense_score: float = 50.0,
+    away_offense_score: float = 50.0,
+    home_bp_workload: float = 0.0,
+    away_bp_workload: float = 0.0,
 ) -> dict:
     """Calculate O/U model total and O/U directional score.
 
@@ -363,9 +373,15 @@ def calculate_ou(
     # --- O/U Score (baseline 50) ---
     ou_score = 50.0
 
-    # Edge score factor: -20 to +20
+    # Edge score factor: asymmetric — UNDER side uses full 20, OVER side dampened to 14
     # High avg edge (dominant pitching) → UNDER, low avg edge → OVER
-    edge_factor = -((avg_edge - 50) / 50) * 20
+    raw_edge = -((avg_edge - 50) / 50)
+    if raw_edge > 0:
+        # OVER direction — dampen (weak pitching doesn't boost scoring linearly)
+        edge_factor = raw_edge * 14
+    else:
+        # UNDER direction — full weight
+        edge_factor = raw_edge * 20
     ou_score += edge_factor
 
     # Park factor: -10 to +10
@@ -400,6 +416,28 @@ def calculate_ou(
         spread_factor = 0
     ou_score += spread_factor
 
+    # Offensive strength factor: strong lineups push OVER, weak push UNDER
+    # Score centered at 50 — range ±8
+    avg_offense = (home_offense_score + away_offense_score) / 2
+    offense_ou = ((avg_offense - 50) / 50) * 8
+    offense_ou = max(-8, min(8, offense_ou))
+    ou_score += offense_ou
+    # Also adjust model total: ±0.5 runs
+    model_total += ((avg_offense - 50) / 50) * 0.5
+
+    # Bullpen fatigue factor: exhausted pens push OVER
+    # workload_3day >= 10 IP for both pens = significant fatigue
+    avg_workload = (home_bp_workload + away_bp_workload) / 2
+    if avg_workload >= 10:
+        fatigue_ou = 6.0   # both pens gassed → strong OVER boost
+        model_total += 0.4
+    elif avg_workload >= 7:
+        fatigue_ou = 3.0   # moderate fatigue
+        model_total += 0.2
+    else:
+        fatigue_ou = 0.0
+    ou_score += fatigue_ou
+
     # Pitcher convergence boost:
     # Both dominant → pitchers' duel (UNDER)
     # Both weak → high-scoring game (OVER)
@@ -412,9 +450,9 @@ def calculate_ou(
     elif low_edge >= 55 and high_edge >= 55:
         convergence_boost = -8.0   # both solid → mild UNDER
     elif high_edge <= 40:
-        convergence_boost = 10.0   # both weak → OVER
+        convergence_boost = 3.0    # both weak → mild OVER (dampened — weak pitchers get pulled early)
     elif high_edge <= 45 and low_edge <= 40:
-        convergence_boost = 5.0    # both below avg → mild OVER
+        convergence_boost = 2.0    # both below avg → slight OVER
 
     ou_score += convergence_boost
 

@@ -33,6 +33,7 @@ from src.profile import (
     get_league_avg_batter,
 )
 from src.bullpen import build_bullpen_profile
+from src.offense import fetch_team_offense
 from src.weather import fetch_weather
 from src.score import score_matchup
 from src.signal import evaluate_game
@@ -157,6 +158,10 @@ def _process_game(
     home_bp = build_bullpen_profile(game.get("home_abbrev", ""))
     away_bp = build_bullpen_profile(game.get("away_abbrev", ""))
 
+    # Offensive strength
+    home_off = fetch_team_offense(game.get("home_abbrev", ""))
+    away_off = fetch_team_offense(game.get("away_abbrev", ""))
+
     # Weather
     weather = fetch_weather(game.get("venue", ""))
 
@@ -173,6 +178,10 @@ def _process_game(
         away_bullpen_score=away_bp["bullpen_score"],
         park_factor=park_factor,
         weather=weather,
+        home_offense_score=home_off["offense_score"],
+        away_offense_score=away_off["offense_score"],
+        home_bp_workload=home_bp.get("workload_3day", 0.0),
+        away_bp_workload=away_bp.get("workload_3day", 0.0),
     )
 
     # Get odds for this game
@@ -198,6 +207,8 @@ def _process_game(
         **signals,
         "date": date_str,
         "lineup_confirmed": lineup_confirmed,
+        "home_lineup_confirmed": lineup_data.get("home_lineup_confirmed", False),
+        "away_lineup_confirmed": lineup_data.get("away_lineup_confirmed", False),
         "starter_confirmed": bool(game.get("home_starter_id") and game.get("away_starter_id")),
         "signal_version": "morning",
     }

@@ -1,0 +1,30 @@
+{
+  "pitcher_id": "663436",
+  "name": "Davis Martin",
+  "hand": "R",
+  "pitch_mix": {},
+  "primary_pitch": "FF",
+  "zone_map": {
+    "out_of_zone": 0
+  },
+  "preferred_zones": [],
+  "bb_pct": 0.12,
+  "chase_rate": 0.6042,
+  "whiff_rate": 0.4138,
+  "k_pct": 0.22,
+  "vs_lhh_splits": {
+    "pitch_mix": {},
+    "zone_map": {
+      "out_of_zone": 0
+    }
+  },
+  "vs_rhh_splits": {
+    "pitch_mix": {},
+    "zone_map": {
+      "out_of_zone": 0
+    }
+  },
+  "sample_size": 96,
+  "last_updated": "2026-04-14",
+  "data_source": "backtest_prior_season"
+}

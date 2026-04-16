@@ -57,7 +57,11 @@ def calculate_ou_new(home_edge, away_edge, park_factor, home_bp, away_bp):
 
     # O/U score
     ou = 50.0
-    ou += -((avg_edge - 50) / 50) * 20
+    raw_edge = -((avg_edge - 50) / 50)
+    if raw_edge > 0:
+        ou += raw_edge * 14  # OVER side dampened
+    else:
+        ou += raw_edge * 20  # UNDER side full weight
 
     park_ou = max(-10, min(10, (park_factor - 1.0) * 100))
     ou += park_ou
@@ -83,9 +87,9 @@ def calculate_ou_new(home_edge, away_edge, park_factor, home_bp, away_bp):
     elif low_e >= 55 and high_e >= 55:
         conv = -8
     elif high_e <= 40:
-        conv = 10
+        conv = 3   # dampened — weak pitchers get pulled early
     elif high_e <= 45 and low_e <= 40:
-        conv = 5
+        conv = 2   # slight OVER
     ou += conv
     mt += conv / 15 * 0.5
 

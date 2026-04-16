@@ -122,13 +122,13 @@ def _format_ml_signal(g: dict) -> List[str]:
     venue = g.get("venue", "")
     lines.append(f"  {away_sp} vs. {home_sp}  |  {venue}")
 
-    # Edge score and bullpen
+    # Edge scores and bullpen
     home_edge = g.get("home_edge_score", 0)
     away_edge = g.get("away_edge_score", 0)
     home_bp = g.get("home_bullpen_score", 0)
     away_bp = g.get("away_bullpen_score", 0)
     lines.append(
-        f"  Edge score:     {max(home_edge, away_edge):.0f}  |  "
+        f"  Edge scores:    {away} {away_edge:.0f} / {home} {home_edge:.0f}  |  "
         f"Bullpen: {home} {home_bp:.0f}  {away} {away_bp:.0f}"
     )
 
@@ -154,6 +154,14 @@ def _format_ml_signal(g: dict) -> List[str]:
         lines.append(f"  Model prob:     {model_prob * 100:.1f}%")
     if value_edge is not None:
         lines.append(f"  Value edge:     {value_edge * 100:+.1f}%")
+
+    ou_score = g.get("ou_score")
+    if ou_score is not None:
+        lines.append(f"  O/U score:      {ou_score:.0f}")
+
+    warning = _proxy_warning(g)
+    if warning:
+        lines.append(warning)
 
     return lines
 
@@ -212,6 +220,14 @@ def _format_diff_signal(g: dict) -> List[str]:
     if diff_value_edge is not None:
         lines.append(f"  Value edge:     {diff_value_edge * 100:+.1f}%")
 
+    ou_score = g.get("ou_score")
+    if ou_score is not None:
+        lines.append(f"  O/U score:      {ou_score:.0f}")
+
+    warning = _proxy_warning(g)
+    if warning:
+        lines.append(warning)
+
     return lines
 
 
@@ -254,6 +270,10 @@ def _format_ou_signal(g: dict) -> List[str]:
     if ou_value is not None:
         lines.append(f"  Value edge:     {ou_value * 100:+.1f}%")
 
+    warning = _proxy_warning(g)
+    if warning:
+        lines.append(warning)
+
     return lines
 
 
@@ -271,10 +291,29 @@ def _format_no_bet(g: dict) -> str:
     value_edge = g.get("value_edge")
     value_str = f"Value: {value_edge * 100:+.1f}%" if value_edge is not None else "Value: N/A"
 
+    warning = _proxy_warning(g)
+    proxy_tag = "  [LINEUP TBD]" if warning else ""
     return (
         f"{away} @ {home}  {game_time}  |  {away_sp} vs. {home_sp}  |"
-        f"Edge: {away} {away_edge:.0f} / {home} {home_edge:.0f}  O/U: {ou_score:.0f}  {value_str}"
+        f"Edge: {away} {away_edge:.0f} / {home} {home_edge:.0f}  O/U: {ou_score:.0f}  {value_str}{proxy_tag}"
     )
+
+
+def _proxy_warning(g: dict) -> Optional[str]:
+    """Return a warning string if either lineup is a proxy, else None."""
+    away = g.get("away_abbrev", g.get("away_team", "???"))
+    home = g.get("home_abbrev", g.get("home_team", "???"))
+    home_conf = g.get("home_lineup_confirmed", True)
+    away_conf = g.get("away_lineup_confirmed", True)
+    missing = []
+    if not home_conf:
+        missing.append(home)
+    if not away_conf:
+        missing.append(away)
+    if missing:
+        teams = " & ".join(missing)
+        return f"  *** Lineup not released: {teams} — re-run when posted ***"
+    return None
 
 
 def _format_time(game_time: str) -> str:

@@ -1,0 +1,48 @@
+{
+  "vulnerable_zones": [
+    "3",
+    "6",
+    "9"
+  ],
+  "chase_rate": 0.4386,
+  "contact_rate": 0.7254,
+  "name": "",
+  "zone_cold_spots": {
+    "9": 0.0,
+    "5": 0.0,
+    "6": 0.0,
+    "1": 0.176,
+    "3": 0.176
+  },
+  "preferred_hit_zones": [
+    "4",
+    "8",
+    "5"
+  ],
+  "pitch_type_perf": {
+    "SL": 0.3838,
+    "SI": 0.217,
+    "CU": 0.0,
+    "FC": 0.4482,
+    "ST": 0.1956,
+    "FF": 0.3259,
+    "CH": 0.1814
+  },
+  "bb_pct": 0.0348,
+  "batter_id": "678882",
+  "worst_pitch_type": "FC",
+  "k_pct": 0.287,
+  "best_pitch_type": "CH",
+  "hand": "R",
+  "zone_hot_spots": {
+    "9": 0.5109,
+    "5": 0.0,
+    "4": 0.0,
+    "8": 0.518,
+    "6": 0.22
+  },
+  "data_source": "backtest_blended",
+  "sample_size": 279,
+  "current_season_pitches": 164,
+  "last_updated": "2026-04-14"
+}

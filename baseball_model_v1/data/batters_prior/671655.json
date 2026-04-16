@@ -1,0 +1,40 @@
+{
+  "batter_id": "671655",
+  "name": "",
+  "hand": "L",
+  "zone_hot_spots": {
+    "8": 0.6133,
+    "7": 0.3744,
+    "5": 0.176
+  },
+  "zone_cold_spots": {
+    "8": 0.6133,
+    "7": 0.3744,
+    "5": 0.176
+  },
+  "preferred_hit_zones": [
+    "8",
+    "7",
+    "5"
+  ],
+  "vulnerable_zones": [
+    "8",
+    "7",
+    "5"
+  ],
+  "pitch_type_perf": {
+    "KC": 0.5617,
+    "FF": 0.4006,
+    "SL": 0.3312,
+    "CH": 0.088
+  },
+  "best_pitch_type": "KC",
+  "worst_pitch_type": "CH",
+  "bb_pct": 0.1273,
+  "k_pct": 0.2727,
+  "chase_rate": 0.2439,
+  "contact_rate": 0.71,
+  "sample_size": 55,
+  "last_updated": "2026-04-14",
+  "data_source": "prior_season"
+}

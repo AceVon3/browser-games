@@ -1,0 +1,19 @@
+{
+  "batter_id": "578428",
+  "name": "",
+  "hand": "R",
+  "zone_hot_spots": {},
+  "zone_cold_spots": {},
+  "preferred_hit_zones": [],
+  "vulnerable_zones": [],
+  "pitch_type_perf": {},
+  "best_pitch_type": "",
+  "worst_pitch_type": "",
+  "bb_pct": 0.0625,
+  "k_pct": 0.25,
+  "chase_rate": 0.5745,
+  "contact_rate": 0.7778,
+  "sample_size": 16,
+  "last_updated": "2026-04-14",
+  "data_source": "backtest_prior_season"
+}

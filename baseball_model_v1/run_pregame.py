@@ -27,6 +27,7 @@ from src.fetch import (
 )
 from src.profile import build_batter_profile, get_league_avg_batter
 from src.bullpen import build_bullpen_profile
+from src.offense import fetch_team_offense
 from src.weather import fetch_weather
 from src.score import score_matchup
 from src.signal import evaluate_game
@@ -214,6 +215,10 @@ def _rescore_game(
     home_bp = build_bullpen_profile(morning.get("home_abbrev", ""))
     away_bp = build_bullpen_profile(morning.get("away_abbrev", ""))
 
+    # Offensive strength
+    home_off = fetch_team_offense(morning.get("home_abbrev", ""))
+    away_off = fetch_team_offense(morning.get("away_abbrev", ""))
+
     weather = fetch_weather(morning.get("venue", ""))
     park_factor = _lookup_park_factor(morning.get("venue", ""), park_factors)
 
@@ -226,6 +231,10 @@ def _rescore_game(
         away_bullpen_score=away_bp["bullpen_score"],
         park_factor=park_factor,
         weather=weather,
+        home_offense_score=home_off["offense_score"],
+        away_offense_score=away_off["offense_score"],
+        home_bp_workload=home_bp.get("workload_3day", 0.0),
+        away_bp_workload=away_bp.get("workload_3day", 0.0),
     )
 
     odds = _match_odds(morning, odds_lookup)
@@ -299,8 +308,9 @@ def _build_odds_lookup(all_odds: List[dict]) -> dict:
     for odds in all_odds:
         home = odds.get("home_team", "")
         away = odds.get("away_team", "")
+        commence = odds.get("commence_time", "")[:10]
         if home and away:
-            lookup[(home, away)] = odds
+            lookup[(home, away, commence)] = odds
     return lookup
 
 

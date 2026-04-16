@@ -1,0 +1,40 @@
+{
+  "batter_id": "672642",
+  "name": "League Average",
+  "hand": "R",
+  "zone_hot_spots": {
+    "5": 0.38,
+    "4": 0.36,
+    "6": 0.35
+  },
+  "zone_cold_spots": {
+    "1": 0.28,
+    "3": 0.27,
+    "7": 0.26
+  },
+  "preferred_hit_zones": [
+    "5",
+    "4",
+    "6"
+  ],
+  "vulnerable_zones": [
+    "1",
+    "3",
+    "7"
+  ],
+  "pitch_type_perf": {
+    "FF": 0.34,
+    "SL": 0.29,
+    "CH": 0.31,
+    "CU": 0.28
+  },
+  "best_pitch_type": "FF",
+  "worst_pitch_type": "CU",
+  "bb_pct": 0.082,
+  "k_pct": 0.22,
+  "chase_rate": 0.3,
+  "contact_rate": 0.76,
+  "sample_size": 0,
+  "last_updated": "2026-04-14",
+  "data_source": "league_avg"
+}
