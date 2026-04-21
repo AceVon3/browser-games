@@ -50,6 +50,9 @@ class Filing:
     pdf_parse_fields_found: list[str] = field(default_factory=list)
     detail_url: Optional[str] = None
 
+    in_target_lines: Optional[bool] = None
+    is_resubmission_of: Optional[str] = None
+
     def compute_premium_change(self) -> None:
         if self.current_avg_premium is not None and self.proposed_avg_premium is not None:
             self.premium_change_dollars = round(

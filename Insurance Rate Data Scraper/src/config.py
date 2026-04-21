@@ -16,9 +16,20 @@ TARGET_COMPANIES = [
     "Liberty Mutual",
 ]
 
+# Lines of business we care about for the final product: personal lines only.
+# Matched case-insensitive partial against `type_of_insurance` and
+# `sub_type_of_insurance`. Out-of-scope lines (Commercial Auto, Personal
+# Umbrella, CMP, Professional Liability, Renters, VIP, etc.) stay in the raw
+# dataset but are flagged via `Filing.in_target_lines = False`.
+TARGET_LINES = [
+    "personal auto",
+    "private passenger auto",
+    "homeowners",
+]
+
 STATES = ["WA", "ID", "CO"]
 
-DATE_FROM = "01/01/2024"
+DATE_FROM = "01/01/2025"
 DATE_TO = "04/17/2026"
 
 REQUEST_DELAY = 2.5

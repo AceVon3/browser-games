@@ -8,9 +8,11 @@ from __future__ import annotations
 
 import logging
 import re
+import subprocess
+import sys
 from datetime import date, datetime
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -135,8 +137,16 @@ def match_target_company(company_name: str, targets: list[str]) -> Optional[str]
 
 # ---------- PDF text extraction ----------
 
+DEFAULT_PDF_PARSE_TIMEOUT_S = 60.0
+
+
 def extract_pdf_text(pdf_path: Path) -> Optional[str]:
-    """Extract text from a PDF. Tries pdfplumber first, falls back to pypdf."""
+    """Extract text from a PDF. Tries pdfplumber first, falls back to pypdf.
+
+    NOTE: This in-process variant has no timeout protection — pdfplumber can
+    hang on certain malformed/complex PDFs even when they're under the 15MB
+    cap. Prefer `extract_pdf_text_with_timeout` for new code.
+    """
     pdf_path = Path(pdf_path)
     if not pdf_path.exists():
         return None
@@ -147,6 +157,43 @@ def extract_pdf_text(pdf_path: Path) -> Optional[str]:
     if text and text.strip():
         return text
     return None
+
+
+def extract_pdf_text_with_timeout(
+    pdf_path: Path,
+    timeout_s: float = DEFAULT_PDF_PARSE_TIMEOUT_S,
+) -> Tuple[Optional[str], str]:
+    """Extract text via a subprocess so a hard timeout can be enforced.
+
+    Returns (text_or_none, status). Status values:
+      * "ok"        — extracted non-empty text
+      * "no_text"   — extractors ran cleanly but yielded nothing (image PDF)
+      * "timeout"   — worker didn't return within `timeout_s`; killed
+      * "missing"   — file does not exist
+      * "error:<n>" — subprocess exited non-zero (n = exit code)
+    """
+    pdf_path = Path(pdf_path)
+    if not pdf_path.exists():
+        return None, "missing"
+    worker_module = "src._pdf_worker"
+    project_root = Path(__file__).resolve().parent.parent
+    try:
+        r = subprocess.run(
+            [sys.executable, "-m", worker_module, str(pdf_path)],
+            capture_output=True,
+            timeout=timeout_s,
+            cwd=str(project_root),
+        )
+    except subprocess.TimeoutExpired:
+        return None, "timeout"
+    except Exception as e:
+        return None, f"error:spawn:{type(e).__name__}"
+    if r.returncode != 0:
+        return None, f"error:{r.returncode}"
+    text = r.stdout.decode("utf-8", errors="replace")
+    if not text.strip():
+        return None, "no_text"
+    return text, "ok"
 
 
 def _extract_with_pdfplumber(pdf_path: Path) -> Optional[str]:
@@ -203,6 +250,10 @@ PDF_FIELD_PATTERNS: list[tuple[str, str, callable]] = [
         rf"(?:will\s+)?result\s+in\s+an?\s+overall\s+rate\s+change\s+of\s+{_PCT_CAPTURE}\s+for\s+(?:the|our)\s+[\w\s\-&/]{{0,60}}?(?:Program|Plan|Line)\b",
         parse_percent,
     ),
+    # Company-prose: "result in a -2.4% overall rate decrease" (Allstate PPA filing memos)
+    # / "result in a 0% rate impact" (Travelers actuarial memos).
+    # Handled separately below so we can sign-flip when the direction word is
+    # "decrease" and the captured value has no explicit sign.
     # NAIC-templated
     (
         "overall_rate_effect",
@@ -283,6 +334,105 @@ PDF_FIELD_PATTERNS: list[tuple[str, str, callable]] = [
     ),
 ]
 
+# Direction-aware "result in a X% overall rate DIRECTION" extractor.
+# Matches variants like:
+#   "result in a -2.4% overall rate decrease"         (Allstate ANAIC PPA memos)
+#   "result in a 0% rate impact"                      (Travelers VCSE actuarial memo)
+#   "will result in an 11.9% overall rate change"
+# When the direction word is "decrease" and the captured number has no explicit
+# sign (and isn't zero), the value is flipped negative so the recorded
+# overall_rate_effect has the correct direction.
+_RESULT_IN_RATE_RE = re.compile(
+    r"result\s+in\s+an?\s+"
+    r"([+\-]?\(?\s*[0-9]+(?:\.[0-9]+)?\s*%\)?)"  # signed/unsigned/parenthesized %
+    r"\s+(?:overall\s+)?rate\s+"
+    r"(impact|change|decrease|increase|effect|adjustment)",
+    re.IGNORECASE,
+)
+
+
+def _extract_result_in_rate(flat_text: str) -> Optional[float]:
+    m = _RESULT_IN_RATE_RE.search(flat_text)
+    if not m:
+        return None
+    val = parse_percent(m.group(1))
+    if val is None:
+        return None
+    direction = m.group(2).lower()
+    raw = m.group(1)
+    # If direction says "decrease" and the number is unsigned positive, flip it.
+    if direction == "decrease" and val > 0 and not re.search(r"[+\-]|\(", raw):
+        val = -val
+    return val
+
+
+# Tightly-bound "credibility-weighted indication of X.X%" extractor. Lower
+# confidence than NAIC-templated patterns and the result-in-rate catcher above
+# — only runs as a final fallback. Used for filings where the rate change is
+# stated in an objection-response letter rather than the company's filing memo
+# (e.g., SFMA-134603714 PLUP, where WA OIC said "this results in a
+# credibility-weighted indication of 73.9%" and State Farm agreed to that
+# rate).
+#
+# Constraints to suppress false positives:
+#   * "indication" must appear immediately before the percentage — bare
+#     "credibility-weighted" is far too broad (it describes loss ratios in
+#     nearly every actuarial PDF).
+#   * Reject if the IMMEDIATE 30-char neighborhood is a loss-ratio descriptor:
+#     pre-context ending with "loss [and lae] ratio" (catches "loss ratio
+#     indication of X%") or post-context starting with "loss [and lae] ratio"
+#     (catches "indication of X% loss ratio"). A blanket "loss or ratio
+#     anywhere within 50 chars" filter rejects the SFMA case (where
+#     "permissible loss ratio" is in a separate clause five words upstream),
+#     so we look for the specific antagonist phrases instead.
+_CREDIBILITY_INDICATION_RE = re.compile(
+    r"credibility[-\s]+weighted\s+indication\s+of\s+"
+    r"([+\-]?\(?\s*[0-9]+(?:\.[0-9]+)?\s*%\)?)",
+    re.IGNORECASE,
+)
+_LOSS_RATIO_PHRASE = re.compile(
+    r"\b(?:loss|lae)(?:\s+(?:and|&)\s+lae)?\s+ratio\b",
+    re.IGNORECASE,
+)
+
+
+def _extract_credibility_indication(flat_text: str) -> Optional[float]:
+    for m in _CREDIBILITY_INDICATION_RE.finditer(flat_text):
+        pre = flat_text[max(0, m.start() - 30):m.start()]
+        post = flat_text[m.end():m.end() + 30]
+        # "<...> loss ratio  indication of X%" — adjacent loss-ratio descriptor
+        if re.search(r"(?:loss|lae)(?:\s+(?:and|&)\s+lae)?\s+ratio\s*$", pre, re.IGNORECASE):
+            continue
+        # "indication of X%  loss ratio <...>" — adjacent loss-ratio descriptor
+        if re.search(r"^\s*(?:loss|lae)(?:\s+(?:and|&)\s+lae)?\s+ratio\b", post, re.IGNORECASE):
+            continue
+        val = parse_percent(m.group(1))
+        if val is not None:
+            return val
+    return None
+
+
+# New-product/new-company launch indicators. When a PDF has no parseable rate
+# fields AND contains one of these phrases, the filing is a product launch (no
+# existing book to change rates on) rather than a parser failure. ANAIC-style
+# greenfield launches in ID put Allstate at 0/9 parse rate, which is correct —
+# these filings genuinely don't carry an overall rate change %.
+NEW_PRODUCT_LAUNCH_PATTERNS = [
+    r"introduc(?:ing|e|es)\s+(?:a|the)\s+new\s+(?:\w+\s+){0,6}?"
+    r"(?:product|company|risk\s+classification\s+plan|rating\s+plan|program)",
+    r"introduc(?:ing|e|es)\s+coverage\s+for\s+",
+    r"new\s+company\s*:\s*[A-Z]",
+    r"proposed\s+new\s+business\s+effective\s+date",
+]
+
+
+def _is_new_product_launch(flat_text: str) -> bool:
+    for pattern in NEW_PRODUCT_LAUNCH_PATTERNS:
+        if re.search(pattern, flat_text, re.IGNORECASE):
+            return True
+    return False
+
+
 # Sentinel phrases meaning "no rate change" — when matched (and overall_rate_effect
 # hasn't already been set from a numeric pattern), we record 0.0.
 ZERO_RATE_CHANGE_SENTINELS = [
@@ -306,26 +456,35 @@ _MIN_SANITY = {
 def parse_rate_effect_pdf(
     pdf_path: Path,
     tracking_number: str = "",
-) -> dict:
+    timeout_s: float = DEFAULT_PDF_PARSE_TIMEOUT_S,
+) -> Tuple[dict, str]:
     """Extract rate-effect fields from a filing PDF.
 
-    Returns a dict with any of: overall_rate_effect, requested_rate_effect,
-    approved_rate_effect, affected_policyholders, written_premium_volume,
-    current_avg_premium, proposed_avg_premium, annual_premium_impact_dollars.
+    Returns (fields_dict, parse_status). Parse status mirrors
+    `extract_pdf_text_with_timeout` plus parser-level outcomes:
+      * "ok"            — text extracted, ≥1 field matched
+      * "no_fields"     — text extracted, no rate-effect field matched
+      * "no_text"       — extractor returned empty (image-only PDF)
+      * "timeout"       — pdfplumber/pypdf killed after `timeout_s`
+      * "missing"       — file not on disk
+      * "error:<n>"     — worker exited non-zero
 
-    Missing fields are omitted (not set to None) so callers can distinguish
-    'not found' from 'explicitly set elsewhere'. Failure is logged, never guessed.
+    Field dict keys (any subset, never set to None):
+      overall_rate_effect, requested_rate_effect, approved_rate_effect,
+      affected_policyholders, written_premium_volume, current_avg_premium,
+      proposed_avg_premium, annual_premium_impact_dollars.
     """
     pdf_path = Path(pdf_path)
     result: dict = {}
-    text = extract_pdf_text(pdf_path)
-    if not text:
+    text, status = extract_pdf_text_with_timeout(pdf_path, timeout_s=timeout_s)
+    if status != "ok" or not text:
         logger.warning(
-            "pdf_parse_failed tracking=%s path=%s reason=no_text_extracted",
+            "pdf_parse_failed tracking=%s path=%s reason=%s",
             tracking_number,
             pdf_path.name,
+            status,
         )
-        return result
+        return result, status
 
     # Normalize whitespace (PDFs often have weird line breaks mid-phrase)
     flat = re.sub(r"\s+", " ", text)
@@ -346,6 +505,21 @@ def parse_rate_effect_pdf(
             continue
         result[field_name] = value
 
+    # Direction-aware "result in a X% overall rate …" catcher — runs only if the
+    # NAIC-templated patterns above didn't already fill overall_rate_effect.
+    if "overall_rate_effect" not in result:
+        val = _extract_result_in_rate(flat)
+        if val is not None:
+            result["overall_rate_effect"] = val
+
+    # Credibility-weighted indication — lowest-confidence fallback. Only runs
+    # if neither the NAIC-templated patterns nor the result-in-rate catcher
+    # set overall_rate_effect, so OVERALL RATE IMPACT always wins on conflict.
+    if "overall_rate_effect" not in result:
+        val = _extract_credibility_indication(flat)
+        if val is not None:
+            result["overall_rate_effect"] = val
+
     # Sentinel check for 0.0 overall rate change (only if not already set)
     if "overall_rate_effect" not in result:
         for sentinel in ZERO_RATE_CHANGE_SENTINELS:
@@ -354,9 +528,17 @@ def parse_rate_effect_pdf(
                 break
 
     if not result:
+        if _is_new_product_launch(flat):
+            logger.info(
+                "pdf_parse_new_product_launch tracking=%s path=%s",
+                tracking_number,
+                pdf_path.name,
+            )
+            return result, "new_product_launch"
         logger.info(
             "pdf_parse_empty tracking=%s path=%s — no rate-effect fields matched",
             tracking_number,
             pdf_path.name,
         )
-    return result
+        return result, "no_fields"
+    return result, "ok"

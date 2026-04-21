@@ -197,7 +197,7 @@ def _parse_fixture_pdfs() -> list[tuple[str, dict]]:
     """Return [(pdf_name, parsed_fields_dict)] for every fixture PDF."""
     out = []
     for pdf in sorted(FIXTURES.glob("*.pdf")):
-        parsed = parse_rate_effect_pdf(pdf, tracking_number=pdf.stem)
+        parsed, _status = parse_rate_effect_pdf(pdf, tracking_number=pdf.stem)
         out.append((pdf.name, parsed))
     return out
 
