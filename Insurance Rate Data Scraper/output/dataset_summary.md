@@ -61,6 +61,12 @@ All 16 columns are 100% populated **except** `overall_indicated_change`, which i
 - **Filer flag:** When the filer flagged "Rate data does NOT apply to filing," the row is excluded — this flag is taken at face value.
 - **PDF parsing:** Three Disposition row patterns are supported. Layouts outside these patterns may be missed (none observed in the 248 filings probed).
 - **Disposition cases:** ID uses ALL-CAPS (`APPROVED`); WA uses `Approved`; CO uses `Filed` (file-and-use). Casing preserved as filed.
+- **WA row count is genuinely thin (15 vs ID 31, CO 79).** Verified — not a scraper gap:
+  - Same date window applied to all three states (2025-01-01 → 2026-04-17).
+  - Fresh re-search (State Farm WA): 28 filings vs 28 in raw archive (100% match).
+  - Of the 54 WA target-TOI target-carrier filings, half (27) are Form-only (no rate impact); 12 are filer-flagged "Rate data does NOT apply to filing." (heavily Travelers); 12 emit rows.
+  - 2026-effective WA rows are sparse (1 of 15) because Allstate's 2026 WA submissions are all Form-only and Travelers' are all filer-flagged "does not apply." This is filer behavior, not missing data.
+  - WA OIC publishes rate filings via SERFF Filing Access (no separate portal).
 
 ## Recommended use
 
