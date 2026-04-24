@@ -9,3 +9,13 @@ desktop.ini
 
 # Logs
 *.log
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Local Claude Code state
+.claude/
+
+# Secrets — sports_tracker config has credentials; never commit
+sports_tracker/config.json

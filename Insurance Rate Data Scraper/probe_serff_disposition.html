@@ -1,0 +1,482 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head id="j_idt5"><script type="text/javascript" src="/sfa/ruxitagentjs_ICANVfghqru_10335260306043831.js" data-dtconfig="app=b0d446983abdf4bc|ssc=1|owasp=1|featureHash=ICANVfghqru|rdnt=1|uxrgce=1|cuc=75ov4p5b|mel=100000|dpvc=1|md=mdcc2=a[name='x-dynatrace']@content,mdcc3=a#myDropdown ^rb div.dropdown-footer ^rb div.user-fullname|lastModification=1776710724411|tp=500,50,0|srbbv=2|agentUri=/sfa/ruxitagentjs_ICANVfghqru_10335260306043831.js|reportUrl=/sfa/rb_bf34584xzn|rid=RID_-744771969|rpid=-1727598776|domain=serff.com"></script><link type="text/css" rel="stylesheet" href="/sfa/javax.faces.resource/theme.css.xhtml?ln=primefaces-flatly"><link type="text/css" rel="stylesheet" href="/sfa/javax.faces.resource/bootstrap.flatly.min.css.xhtml?ln=css"><link type="text/css" rel="stylesheet" href="/sfa/javax.faces.resource/sfa.css.xhtml?ln=css"><link type="text/css" rel="stylesheet" href="/sfa/javax.faces.resource/naic-common-ui.css.xhtml?ln=css"><link type="text/css" rel="stylesheet" href="/sfa/javax.faces.resource/components.css.xhtml?ln=primefaces&amp;v=6.0"><script type="text/javascript" src="/sfa/javax.faces.resource/jquery/jquery.js.xhtml?ln=primefaces&amp;v=6.0"></script><script type="text/javascript" src="/sfa/javax.faces.resource/core.js.xhtml?ln=primefaces&amp;v=6.0"></script><script type="text/javascript" src="/sfa/javax.faces.resource/components.js.xhtml?ln=primefaces&amp;v=6.0"></script><script type="text/javascript" src="/sfa/javax.faces.resource/jquery/jquery-plugins.js.xhtml?ln=primefaces&amp;v=6.0"></script><script type="text/javascript">if(window.PrimeFaces){PrimeFaces.settings.locale='en';}</script>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>SERFF Filing Access - Idaho</title><script type="text/javascript" src="/sfa/javax.faces.resource/bootstrap.min.js.xhtml?ln=js"></script></head><body id="entirePage">
+<div class="naic-navbar">
+	<div class="navbar navbar-default navbar-fixed-top">
+		<div class="container">			
+			<div class="navbar-header">
+				<div class="logo-naic">
+				    <img class="brandmark" src="/sfa/static-web/images/naicLogo_brandmark-nav.png">
+				    <img class="tagline" src="/sfa/static-web/images/naicLogo_tagline-nav.png">
+			    </div>
+				<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#navbar-main">
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button>
+			</div>
+			<div class="navbar-collapse collapse" id="navbar-main">
+				<ul class="nav navbar-nav navbar-right">
+					<li style="padding-left: 1em;"><a href="#" onclick="accessHelp(); return false;">Help</a></li>
+				</ul>
+			</div>
+		</div>	
+		<div class="sfa-state-header">
+			<div class="container">
+				<div class="serffLogo">
+					<img width="200px" src="/sfa/static-web/images/serffLogoTransparent.png">
+				</div>
+				<div class="headerText">
+					<div class="navbar-brand-text">
+						SERFF Filing Access
+					</div><div id="j_idt12" class="ui-outputpanel ui-widget" style="margin-bottom:15px">
+						<div class="siteSubTitle">
+							You are currently operating in the state of Idaho.
+						</div></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+	function accessHelp() {
+		var windowObjectReference = null;
+		var helpUrl = '/sfa/static-web/OnlineHelp.pdf';
+		var features = 'location=no,menubar=no,toolbar=no,resizable=yes,scrollbars=yes,status=yes,height=500,width=800';
+		windowObjectReference = window.open(helpUrl, 'sfaHelp', features);
+		windowObjectReference.focus();
+	}
+</script>
+	    
+	    <div class="container">
+		<ol class="breadcrumb">
+			<li><a href="filingSearch.xhtml">Filing Search</a></li>
+			<li><a href="filingSearchResults.xhtml">Filing Search Results</a></li>
+			<li class="active">Filing Summary</li>
+		</ol>
+	
+			<div id="content">
+				<div id="main">
+					<div id="pageInfo">
+					</div>
+					<div id="bodyContentWrapper">
+<form id="j_idt20" name="j_idt20" method="post" action="/sfa/search/filingSummary.xhtml" enctype="application/x-www-form-urlencoded">
+<input type="hidden" name="j_idt20" value="j_idt20">
+
+				<div class="buttonBar"><button id="j_idt20:j_idt22" name="j_idt20:j_idt22" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only quickButton" onclick="PrimeFaces.ab({s:&quot;j_idt20:j_idt22&quot;});return false;" type="submit" role="button" aria-disabled="false"><span class="ui-button-text ui-c">New Search</span></button><button id="j_idt20:j_idt23" name="j_idt20:j_idt23" type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only quickButton" onclick="window.open('/sfa/search/filingSearch.xhtml','_self')" role="button" aria-disabled="false"><span class="ui-button-text ui-c">Refine Search</span></button><button id="j_idt20:j_idt24" name="j_idt20:j_idt24" type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only quickButton" onclick="window.open('/sfa/search/filingSearchResults.xhtml','_self')" role="button" aria-disabled="false"><span class="ui-button-text ui-c">Return to Search Results</span></button><button id="j_idt20:j_idt25" name="j_idt20:j_idt25" type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only quickButton" onclick="window.open('/sfa/search/binderSearch.xhtml','_self')" role="button" aria-disabled="false"><span class="ui-button-text ui-c">Health Plan Binder Search</span></button>
+				</div><input type="hidden" name="javax.faces.ViewState" id="javax.faces.ViewState" value="-7041145931021539794:-5868111386176825346" autocomplete="off">
+</form>
+				<h2>Filing Summary</h2><div id="j_idt28" class="ui-panel ui-widget ui-widget-content ui-corner-all" data-widget="widget_j_idt28"><div id="j_idt28_content" class="ui-panel-content ui-widget-content">
+					
+					<div class="row">
+						<div class="col-lg-6">
+							<h2>Filing Information</h2>
+							<div class="row"><label class="col-sm-5 text-right">Product Name: </label><div class="col-sm-7">PV-47876</div></div>
+							<div class="row"><label class="col-sm-5 text-right">Type Of Insurance: </label><div class="col-sm-7">19.0 Personal Auto</div></div>
+							<div class="row"><label class="col-sm-5 text-right">Sub Type Of Insurance: </label><div class="col-sm-7">19.0000 Personal Auto Combinations</div></div>
+							<div class="row"><label class="col-sm-5 text-right">Filing Type: </label><div class="col-sm-7">Rate/Rule</div></div>
+							<div class="row"><label class="col-sm-5 text-right">SERFF Tracking Number: </label><div class="col-sm-7">SFMA-134676753</div></div>
+							<div class="row"><label class="col-sm-5 text-right">Submission Date: </label>
+								<div class="col-sm-7">10/9/25
+								</div>
+							</div>							
+							<div class="row"><label class="col-sm-5 text-right">Filing Status: </label><div class="col-sm-7">Closed - FILED</div></div>
+						</div>
+						<div class="col-lg-6">
+							<h2>Filing Outcome</h2>
+							<div class="row"><label class="col-sm-5 text-right">SERFF Status: </label><div class="col-sm-7">Closed</div></div>
+							<div class="row"><label class="col-sm-5 text-right">Disposition Date: </label><div class="col-sm-7">04/12/2026</div>
+							</div>	
+							<div class="row"><label class="col-sm-5 text-right">Disposition Status: </label><div class="col-sm-7">FILED</div></div><div id="j_idt34" class="ui-outputpanel ui-widget">
+								<div class="row"><label class="col-sm-5 text-right">State Status: </label><div class="col-sm-7">FILED</div></div>
+								<div class="row"><label class="col-sm-5 text-right">State Status Last Changed: </label>
+									<div class="col-sm-7">4/12/26
+									</div>
+								</div></div>
+						</div>
+					</div>
+					
+					<h2>Company Information</h2>
+					<div class="row">
+						<label class="col-sm-3 text-center">Company Name</label>
+						<label class="col-sm-2 text-center">Company Code</label>
+						<label class="col-sm-4 text-center">Address</label>
+						<label class="col-sm-3 text-center">Telephone Number</label>
+					</div>
+						<div class="row " style="margin-bottom:5px; padding-top:5px; padding-bottom:5px;">
+							<span class="col-sm-3">State Farm Fire and Casualty Company</span>
+							<span class="col-sm-2 text-center">25143</span>
+							<span class="col-sm-4 text-center">
+								1 State Farm Plaza
+								
+								<br>Bloomington, Illinois 61710
+							</span>
+							<span class="col-sm-3 text-center">(309)766-6341</span>
+						</div>
+						<div class="row alternatingCompany" style="margin-bottom:5px; padding-top:5px; padding-bottom:5px;">
+							<span class="col-sm-3">State Farm Mutual Automobile Insurance Company</span>
+							<span class="col-sm-2 text-center">25178</span>
+							<span class="col-sm-4 text-center">
+								One State Farm Plaza
+								
+								<br>Bloomington, Illinois 61710
+							</span>
+							<span class="col-sm-3 text-center">(309)766-6341</span>
+						</div>
+					
+					<div id="filingContainer">
+					</div>
+					
+					<br>
+<form id="summaryForm" name="summaryForm" method="post" action="/sfa/search/filingSummary.xhtml" enctype="application/x-www-form-urlencoded">
+<input type="hidden" name="summaryForm" value="summaryForm">
+					
+						<div id="attachmentsContainer" class="clearfix">
+						<h2>Attachments</h2><input id="summaryForm:selectedAttachmentIds" type="hidden" name="summaryForm:selectedAttachmentIds"><div id="summaryForm:formAttachmentPanel" class="ui-panel ui-widget ui-widget-content ui-corner-all formTypePanel" data-widget="widget_summaryForm_formAttachmentPanel"><div id="summaryForm:formAttachmentPanel_header" class="ui-panel-titlebar ui-widget-header ui-helper-clearfix ui-corner-all"><span class="ui-panel-title">Forms</span><a id="summaryForm:formAttachmentPanel_toggler" href="#" class="ui-panel-titlebar-icon ui-corner-all ui-state-default"><span class="ui-icon ui-icon-minusthick"></span></a>
+									<a href="#" onclick="selectCurrentVersionCheckboxes('formAttachment'); return false;" id="formAttachmentSelectCurrentButton" class="ui-panel-titlebar-icon ui-corner-all ui-state-default panelButton">Select Current Version Only</a>									
+									<a href="#" onclick="toggleAllCheckboxes('formAttachment', true); return false;" id="formAttachmentSelectAllButton" class="ui-panel-titlebar-icon ui-corner-all ui-state-default panelButton">Select All</a>
+									<a href="#" onclick="toggleAllCheckboxes('formAttachment', false); return false;" id="formAttachmentClearAllButton" class="ui-panel-titlebar-icon ui-corner-all ui-state-default panelButton">Clear All</a></div><div id="summaryForm:formAttachmentPanel_content" class="ui-panel-content ui-widget-content">None Available</div><input type="hidden" id="summaryForm:formAttachmentPanel_collapsed" name="summaryForm:formAttachmentPanel_collapsed" value="false"></div><div id="summaryForm:rateRuleAttachmentPanel" class="ui-panel ui-widget ui-widget-content ui-corner-all formTypePanel" data-widget="widget_summaryForm_rateRuleAttachmentPanel"><div id="summaryForm:rateRuleAttachmentPanel_header" class="ui-panel-titlebar ui-widget-header ui-helper-clearfix ui-corner-all"><span class="ui-panel-title">Rate/Rule</span><a id="summaryForm:rateRuleAttachmentPanel_toggler" href="#" class="ui-panel-titlebar-icon ui-corner-all ui-state-default"><span class="ui-icon ui-icon-minusthick"></span></a>
+									<a href="#" onclick="selectCurrentVersionCheckboxes('rateRuleAttachment'); return false;" id="rateRuleAttachmentSelectCurrentButton" class="ui-panel-titlebar-icon ui-corner-all ui-state-default panelButton">Select Current Version Only</a>									
+									<a href="#" onclick="toggleAllCheckboxes('rateRuleAttachment', true); return false;" id="rateRuleAttachmentSelectAllButton" class="ui-panel-titlebar-icon ui-corner-all ui-state-default panelButton">Select All</a>
+									<a href="#" onclick="toggleAllCheckboxes('rateRuleAttachment', false); return false;" id="rateRuleAttachmentClearAllButton" class="ui-panel-titlebar-icon ui-corner-all ui-state-default panelButton">Clear All</a></div><div id="summaryForm:rateRuleAttachmentPanel_content" class="ui-panel-content ui-widget-content"><div id="summaryForm:j_idt167" class="ui-outputpanel ui-widget">
+									<div class="row">
+										<div class="col-lg-4 summaryScheduleItemHeader">
+											Document Name
+										</div>
+										<div class="col-lg-2 summaryScheduleItemHeader">
+											Rate Action
+										</div>
+										<div class="col-lg-4 summaryScheduleItemHeader">
+											Attachments
+										</div>
+										<div class="col-lg-2 summaryScheduleItemHeader">
+											Date Submitted
+										</div>
+									</div>
+	<div class="row ">
+		<span class="col-lg-12">
+		</span>		
+	</div>
+	
+	<div class="row ">
+		<div class="col-lg-4 summaryScheduleItemData">
+			Manual Pages
+		</div>
+		<div class="col-lg-2 summaryScheduleItemData">
+			Replacement
+		</div>
+		<div class="col-lg-4 summaryScheduleItemData">				
+				<div class="row">
+					<div class="col-lg-12">
+							<input type="checkbox" id="currentVersion_rateRuleAttachment_182974876_selected" value="218850741-182974876" style="margin-right:8px;"><img id="summaryForm:j_idt169:0:j_idt174:0:j_idt180" src="/sfa/static-web/images/clip_1.gif?pfdrid_c=true" alt=""><a id="summaryForm:j_idt169:0:j_idt174:0:downloadAttachment_" href="#" class="ui-commandlink ui-widget" onclick="PrimeFaces.addSubmitParam('summaryForm',{'summaryForm:j_idt169:0:j_idt174:0:downloadAttachment_':'summaryForm:j_idt169:0:j_idt174:0:downloadAttachment_'}).submit('summaryForm','_blank');return false;" target="_blank">ID AT 2026-01-02 Pages Changed - Amended.pdf</a>
+					</div>
+				</div>
+		</div>
+		<div class="col-lg-2 summaryScheduleItemData">2/26/26
+		</div>
+	</div></div></div><input type="hidden" id="summaryForm:rateRuleAttachmentPanel_collapsed" name="summaryForm:rateRuleAttachmentPanel_collapsed" value="false"></div><div id="summaryForm:supportingDocumentAttachmentPanel" class="ui-panel ui-widget ui-widget-content ui-corner-all formTypePanel" data-widget="widget_summaryForm_supportingDocumentAttachmentPanel"><div id="summaryForm:supportingDocumentAttachmentPanel_header" class="ui-panel-titlebar ui-widget-header ui-helper-clearfix ui-corner-all"><span class="ui-panel-title">Supporting Documentation</span><a id="summaryForm:supportingDocumentAttachmentPanel_toggler" href="#" class="ui-panel-titlebar-icon ui-corner-all ui-state-default"><span class="ui-icon ui-icon-minusthick"></span></a>
+									<a href="#" onclick="selectCurrentVersionCheckboxes('supportingDocumentAttachment'); return false;" id="supportingDocumentAttachmentSelectCurrentButton" class="ui-panel-titlebar-icon ui-corner-all ui-state-default panelButton">Select Current Version Only</a>									
+									<a href="#" onclick="toggleAllCheckboxes('supportingDocumentAttachment', true); return false;" id="supportingDocumentAttachmentSelectAllButton" class="ui-panel-titlebar-icon ui-corner-all ui-state-default panelButton">Select All</a>
+									<a href="#" onclick="toggleAllCheckboxes('supportingDocumentAttachment', false); return false;" id="supportingDocumentAttachmentClearAllButton" class="ui-panel-titlebar-icon ui-corner-all ui-state-default panelButton">Clear All</a></div><div id="summaryForm:supportingDocumentAttachmentPanel_content" class="ui-panel-content ui-widget-content"><div id="summaryForm:j_idt219" class="ui-outputpanel ui-widget">
+									<div class="row">
+										<div class="col-lg-5 summaryScheduleItemHeader">
+											Document Name
+										</div>
+										<div class="col-lg-5 summaryScheduleItemHeader">
+											Attachments
+										</div>
+										<div class="col-lg-2 summaryScheduleItemHeader">
+											Date Submitted
+										</div>
+									</div>
+	<div class="row ">
+		<span class="col-lg-12">
+		</span>		
+	</div>
+	
+	<div class="row ">
+		<div class="col-lg-5 summaryScheduleItemData">
+			0422PCRcklst
+		</div>
+		<div class="col-lg-5 summaryScheduleItemData">				
+				<div class="row">
+					<div class="col-lg-12">
+							<input type="checkbox" id="currentVersion_supportingDocumentAttachment_181938509_selected" value="217112455-181938509" style="margin-right:8px;"><img id="summaryForm:j_idt221:0:j_idt226:0:j_idt232" src="/sfa/static-web/images/clip_1.gif?pfdrid_c=true" alt=""><a id="summaryForm:j_idt221:0:j_idt226:0:downloadAttachment_" href="#" class="ui-commandlink ui-widget" onclick="PrimeFaces.addSubmitParam('summaryForm',{'summaryForm:j_idt221:0:j_idt226:0:downloadAttachment_':'summaryForm:j_idt221:0:j_idt226:0:downloadAttachment_'}).submit('summaryForm','_blank');return false;" target="_blank">0422PCRcklst.pdf</a>
+					</div>
+				</div>
+		</div>
+		<div class="col-lg-2 summaryScheduleItemData">10/9/25
+		</div>
+	</div>
+	<div class="row ">
+		<span class="col-lg-12">
+		</span>		
+	</div>
+	
+	<div class="row ">
+		<div class="col-lg-5 summaryScheduleItemData">
+			Actuarial Memorandum
+		</div>
+		<div class="col-lg-5 summaryScheduleItemData">				
+				<div class="row">
+					<div class="col-lg-12">
+							<input type="checkbox" id="currentVersion_supportingDocumentAttachment_181939325_selected" value="218850742-181939325" style="margin-right:8px;"><img id="summaryForm:j_idt221:1:j_idt226:0:j_idt232" src="/sfa/static-web/images/clip_1.gif?pfdrid_c=true" alt=""><a id="summaryForm:j_idt221:1:j_idt226:0:downloadAttachment_" href="#" class="ui-commandlink ui-widget" onclick="PrimeFaces.addSubmitParam('summaryForm',{'summaryForm:j_idt221:1:j_idt226:0:downloadAttachment_':'summaryForm:j_idt221:1:j_idt226:0:downloadAttachment_'}).submit('summaryForm','_blank');return false;" target="_blank">Idaho-Filing-Certification.pdf</a>
+					</div>
+				</div>				
+				<div class="row">
+					<div class="col-lg-12">
+							<input type="checkbox" id="currentVersion_supportingDocumentAttachment_181939338_selected" value="218850742-181939338" style="margin-right:8px;"><img id="summaryForm:j_idt221:1:j_idt226:1:j_idt232" src="/sfa/static-web/images/clip_1.gif?pfdrid_c=true" alt=""><a id="summaryForm:j_idt221:1:j_idt226:1:downloadAttachment_" href="#" class="ui-commandlink ui-widget" onclick="PrimeFaces.addSubmitParam('summaryForm',{'summaryForm:j_idt221:1:j_idt226:1:downloadAttachment_':'summaryForm:j_idt221:1:j_idt226:1:downloadAttachment_'}).submit('summaryForm','_blank');return false;" target="_blank">Auto Cost Containment Exhibit 2025.pdf</a>
+					</div>
+				</div>				
+				<div class="row">
+					<div class="col-lg-12">
+							<input type="checkbox" id="currentVersion_supportingDocumentAttachment_182649955_selected" value="218850742-182649955" style="margin-right:8px;"><img id="summaryForm:j_idt221:1:j_idt226:2:j_idt232" src="/sfa/static-web/images/clip_1.gif?pfdrid_c=true" alt=""><a id="summaryForm:j_idt221:1:j_idt226:2:downloadAttachment_" href="#" class="ui-commandlink ui-widget" onclick="PrimeFaces.addSubmitParam('summaryForm',{'summaryForm:j_idt221:1:j_idt226:2:downloadAttachment_':'summaryForm:j_idt221:1:j_idt226:2:downloadAttachment_'}).submit('summaryForm','_blank');return false;" target="_blank">ID Filing Exhibits.pdf</a>
+					</div>
+				</div>				
+				<div class="row">
+					<div class="col-lg-12">
+							<input type="checkbox" id="currentVersion_supportingDocumentAttachment_182968947_selected" value="218850742-182968947" style="margin-right:8px;"><img id="summaryForm:j_idt221:1:j_idt226:3:j_idt232" src="/sfa/static-web/images/clip_1.gif?pfdrid_c=true" alt=""><a id="summaryForm:j_idt221:1:j_idt226:3:downloadAttachment_" href="#" class="ui-commandlink ui-widget" onclick="PrimeFaces.addSubmitParam('summaryForm',{'summaryForm:j_idt221:1:j_idt226:3:downloadAttachment_':'summaryForm:j_idt221:1:j_idt226:3:downloadAttachment_'}).submit('summaryForm','_blank');return false;" target="_blank">ID Actuarial Memorandum - Amended.pdf</a>
+					</div>
+				</div>
+		</div>
+		<div class="col-lg-2 summaryScheduleItemData">2/26/26
+		</div>
+	</div>
+	<div class="row ">
+		<span class="col-lg-12">
+		</span>		
+	</div>
+	
+	<div class="row ">
+		<div class="col-lg-5 summaryScheduleItemData">
+			Attestation
+		</div>
+		<div class="col-lg-5 summaryScheduleItemData">				
+				<div class="row">
+					<div class="col-lg-12">
+							<input type="checkbox" id="currentVersion_supportingDocumentAttachment_181939366_selected" value="217112457-181939366" style="margin-right:8px;"><img id="summaryForm:j_idt221:2:j_idt226:0:j_idt232" src="/sfa/static-web/images/clip_1.gif?pfdrid_c=true" alt=""><a id="summaryForm:j_idt221:2:j_idt226:0:downloadAttachment_" href="#" class="ui-commandlink ui-widget" onclick="PrimeFaces.addSubmitParam('summaryForm',{'summaryForm:j_idt221:2:j_idt226:0:downloadAttachment_':'summaryForm:j_idt221:2:j_idt226:0:downloadAttachment_'}).submit('summaryForm','_blank');return false;" target="_blank">Credit Factors Attestation.pdf</a>
+					</div>
+				</div>
+		</div>
+		<div class="col-lg-2 summaryScheduleItemData">10/9/25
+		</div>
+	</div>
+	<div class="row ">
+		<span class="col-lg-12">
+		</span>		
+	</div>
+	
+	<div class="row ">
+		<div class="col-lg-5 summaryScheduleItemData">
+			Manual Compare
+		</div>
+		<div class="col-lg-5 summaryScheduleItemData">				
+				<div class="row">
+					<div class="col-lg-12">
+							<input type="checkbox" id="currentVersion_supportingDocumentAttachment_182974902_selected" value="218850743-182974902" style="margin-right:8px;"><img id="summaryForm:j_idt221:3:j_idt226:0:j_idt232" src="/sfa/static-web/images/clip_1.gif?pfdrid_c=true" alt=""><a id="summaryForm:j_idt221:3:j_idt226:0:downloadAttachment_" href="#" class="ui-commandlink ui-widget" onclick="PrimeFaces.addSubmitParam('summaryForm',{'summaryForm:j_idt221:3:j_idt226:0:downloadAttachment_':'summaryForm:j_idt221:3:j_idt226:0:downloadAttachment_'}).submit('summaryForm','_blank');return false;" target="_blank">ID AT 2026-01-02 Compare - Amended.pdf</a>
+					</div>
+				</div>
+		</div>
+		<div class="col-lg-2 summaryScheduleItemData">2/26/26
+		</div>
+	</div>
+	<div class="row ">
+		<span class="col-lg-12">
+		</span>		
+	</div>
+	
+	<div class="row ">
+		<div class="col-lg-5 summaryScheduleItemData">
+			10-20 Objection Response
+		</div>
+		<div class="col-lg-5 summaryScheduleItemData">				
+				<div class="row">
+					<div class="col-lg-12">
+							<input type="checkbox" id="currentVersion_supportingDocumentAttachment_182078973_selected" value="217566591-182078973" style="margin-right:8px;"><img id="summaryForm:j_idt221:4:j_idt226:0:j_idt232" src="/sfa/static-web/images/clip_1.gif?pfdrid_c=true" alt=""><a id="summaryForm:j_idt221:4:j_idt226:0:downloadAttachment_" href="#" class="ui-commandlink ui-widget" onclick="PrimeFaces.addSubmitParam('summaryForm',{'summaryForm:j_idt221:4:j_idt226:0:downloadAttachment_':'summaryForm:j_idt221:4:j_idt226:0:downloadAttachment_'}).submit('summaryForm','_blank');return false;" target="_blank">Rate Capping Narrative.pdf</a>
+					</div>
+				</div>				
+				<div class="row">
+					<div class="col-lg-12">
+							<input type="checkbox" id="currentVersion_supportingDocumentAttachment_182078974_selected" value="217566591-182078974" style="margin-right:8px;"><img id="summaryForm:j_idt221:4:j_idt226:1:j_idt232" src="/sfa/static-web/images/clip_1.gif?pfdrid_c=true" alt=""><a id="summaryForm:j_idt221:4:j_idt226:1:downloadAttachment_" href="#" class="ui-commandlink ui-widget" onclick="PrimeFaces.addSubmitParam('summaryForm',{'summaryForm:j_idt221:4:j_idt226:1:downloadAttachment_':'summaryForm:j_idt221:4:j_idt226:1:downloadAttachment_'}).submit('summaryForm','_blank');return false;" target="_blank">Rate Stability Examples.pdf</a>
+					</div>
+				</div>				
+				<div class="row">
+					<div class="col-lg-12">
+							<input type="checkbox" id="currentVersion_supportingDocumentAttachment_182079631_selected" value="217566591-182079631" style="margin-right:8px;"><img id="summaryForm:j_idt221:4:j_idt226:2:j_idt232" src="/sfa/static-web/images/clip_1.gif?pfdrid_c=true" alt=""><a id="summaryForm:j_idt221:4:j_idt226:2:downloadAttachment_" href="#" class="ui-commandlink ui-widget" onclick="PrimeFaces.addSubmitParam('summaryForm',{'summaryForm:j_idt221:4:j_idt226:2:downloadAttachment_':'summaryForm:j_idt221:4:j_idt226:2:downloadAttachment_'}).submit('summaryForm','_blank');return false;" target="_blank">Exhibit 22 - Policy Premium Breakdown Updated.pdf</a>
+					</div>
+				</div>				
+				<div class="row">
+					<div class="col-lg-12">
+							<input type="checkbox" id="currentVersion_supportingDocumentAttachment_182079890_selected" value="217566591-182079890" style="margin-right:8px;"><img id="summaryForm:j_idt221:4:j_idt226:3:j_idt232" src="/sfa/static-web/images/clip_1.gif?pfdrid_c=true" alt=""><a id="summaryForm:j_idt221:4:j_idt226:3:downloadAttachment_" href="#" class="ui-commandlink ui-widget" onclick="PrimeFaces.addSubmitParam('summaryForm',{'summaryForm:j_idt221:4:j_idt226:3:downloadAttachment_':'summaryForm:j_idt221:4:j_idt226:3:downloadAttachment_'}).submit('summaryForm','_blank');return false;" target="_blank">ID Objection Response (10-20-2025).pdf</a>
+					</div>
+				</div>
+		</div>
+		<div class="col-lg-2 summaryScheduleItemData">10/29/25
+		</div>
+	</div>
+	<div class="row ">
+		<span class="col-lg-12">
+		</span>		
+	</div>
+	
+	<div class="row ">
+		<div class="col-lg-5 summaryScheduleItemData">
+			1-5-26 Objection Response
+		</div>
+		<div class="col-lg-5 summaryScheduleItemData">				
+				<div class="row">
+					<div class="col-lg-12">
+							<input type="checkbox" id="currentVersion_supportingDocumentAttachment_182648894_selected" value="218393054-182648894" style="margin-right:8px;"><img id="summaryForm:j_idt221:5:j_idt226:0:j_idt232" src="/sfa/static-web/images/clip_1.gif?pfdrid_c=true" alt=""><a id="summaryForm:j_idt221:5:j_idt226:0:downloadAttachment_" href="#" class="ui-commandlink ui-widget" onclick="PrimeFaces.addSubmitParam('summaryForm',{'summaryForm:j_idt221:5:j_idt226:0:downloadAttachment_':'summaryForm:j_idt221:5:j_idt226:0:downloadAttachment_'}).submit('summaryForm','_blank');return false;" target="_blank">01.05.2026 Objection Response.pdf</a>
+					</div>
+				</div>
+		</div>
+		<div class="col-lg-2 summaryScheduleItemData">1/16/26
+		</div>
+	</div>
+	<div class="row ">
+		<span class="col-lg-12">
+		</span>		
+	</div>
+	
+	<div class="row ">
+		<div class="col-lg-5 summaryScheduleItemData">
+			1-30-26 Objection Response
+		</div>
+		<div class="col-lg-5 summaryScheduleItemData">				
+				<div class="row">
+					<div class="col-lg-12">
+							<input type="checkbox" id="currentVersion_supportingDocumentAttachment_182831188_selected" value="218654106-182831188" style="margin-right:8px;"><img id="summaryForm:j_idt221:6:j_idt226:0:j_idt232" src="/sfa/static-web/images/clip_1.gif?pfdrid_c=true" alt=""><a id="summaryForm:j_idt221:6:j_idt226:0:downloadAttachment_" href="#" class="ui-commandlink ui-widget" onclick="PrimeFaces.addSubmitParam('summaryForm',{'summaryForm:j_idt221:6:j_idt226:0:downloadAttachment_':'summaryForm:j_idt221:6:j_idt226:0:downloadAttachment_'}).submit('summaryForm','_blank');return false;" target="_blank">01.30.2026 Objection Response.pdf</a>
+					</div>
+				</div>
+		</div>
+		<div class="col-lg-2 summaryScheduleItemData">2/11/26
+		</div>
+	</div>
+	<div class="row ">
+		<span class="col-lg-12">
+		</span>		
+	</div>
+	
+	<div class="row ">
+		<div class="col-lg-5 summaryScheduleItemData">
+			2-13-26 Objection Response
+		</div>
+		<div class="col-lg-5 summaryScheduleItemData">				
+				<div class="row">
+					<div class="col-lg-12">
+							<input type="checkbox" id="currentVersion_supportingDocumentAttachment_182968875_selected" value="218850744-182968875" style="margin-right:8px;"><img id="summaryForm:j_idt221:7:j_idt226:0:j_idt232" src="/sfa/static-web/images/clip_1.gif?pfdrid_c=true" alt=""><a id="summaryForm:j_idt221:7:j_idt226:0:downloadAttachment_" href="#" class="ui-commandlink ui-widget" onclick="PrimeFaces.addSubmitParam('summaryForm',{'summaryForm:j_idt221:7:j_idt226:0:downloadAttachment_':'summaryForm:j_idt221:7:j_idt226:0:downloadAttachment_'}).submit('summaryForm','_blank');return false;" target="_blank">02.13.2026 Objection Response.pdf</a>
+					</div>
+				</div>
+		</div>
+		<div class="col-lg-2 summaryScheduleItemData">2/26/26
+		</div>
+	</div>
+	<div class="row ">
+		<span class="col-lg-12">
+		</span>		
+	</div>
+	
+	<div class="row ">
+		<div class="col-lg-5 summaryScheduleItemData">
+			3-9-26 Objection Response
+		</div>
+		<div class="col-lg-5 summaryScheduleItemData">				
+				<div class="row">
+					<div class="col-lg-12">
+							<input type="checkbox" id="currentVersion_supportingDocumentAttachment_183091854_selected" value="219028946-183091854" style="margin-right:8px;"><img id="summaryForm:j_idt221:8:j_idt226:0:j_idt232" src="/sfa/static-web/images/clip_1.gif?pfdrid_c=true" alt=""><a id="summaryForm:j_idt221:8:j_idt226:0:downloadAttachment_" href="#" class="ui-commandlink ui-widget" onclick="PrimeFaces.addSubmitParam('summaryForm',{'summaryForm:j_idt221:8:j_idt226:0:downloadAttachment_':'summaryForm:j_idt221:8:j_idt226:0:downloadAttachment_'}).submit('summaryForm','_blank');return false;" target="_blank">03.09.2026 Objection Response.pdf</a>
+					</div>
+				</div>
+		</div>
+		<div class="col-lg-2 summaryScheduleItemData">3/17/26
+		</div>
+	</div></div></div><input type="hidden" id="summaryForm:supportingDocumentAttachmentPanel_collapsed" name="summaryForm:supportingDocumentAttachmentPanel_collapsed" value="false"></div><div id="summaryForm:correspondenceAttachmentPanel" class="ui-panel ui-widget ui-widget-content ui-corner-all formTypePanel" data-widget="widget_summaryForm_correspondenceAttachmentPanel"><div id="summaryForm:correspondenceAttachmentPanel_header" class="ui-panel-titlebar ui-widget-header ui-helper-clearfix ui-corner-all"><span class="ui-panel-title">Correspondence</span><a id="summaryForm:correspondenceAttachmentPanel_toggler" href="#" class="ui-panel-titlebar-icon ui-corner-all ui-state-default"><span class="ui-icon ui-icon-minusthick"></span></a>																	
+									<a href="#" onclick="toggleAllCheckboxes('correspondenceAttachment', true); return false;" id="correspondenceAttachmentSelectAllButton" class="ui-panel-titlebar-icon ui-corner-all ui-state-default panelButton">Select All</a>
+									<a href="#" onclick="toggleAllCheckboxes('correspondenceAttachment', false); return false;" id="correspondenceAttachmentClearAllButton" class="ui-panel-titlebar-icon ui-corner-all ui-state-default panelButton">Clear All</a></div><div id="summaryForm:correspondenceAttachmentPanel_content" class="ui-panel-content ui-widget-content">None Available</div><input type="hidden" id="summaryForm:correspondenceAttachmentPanel_collapsed" name="summaryForm:correspondenceAttachmentPanel_collapsed" value="false"></div>
+						</div>	
+						
+						<div class="row">
+							<div class="col-md-12"><button id="summaryForm:downloadLink" name="summaryForm:downloadLink" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only pull-right" onclick="PrimeFaces.bcn(this,event,[function(event){PrimeFaces.monitorDownload(start, stop);gatherSelectedAttachments();},function(event){}]);" type="submit" role="button" aria-disabled="false"><span class="ui-button-text ui-c">Download Zip File</span></button>
+							</div>
+						</div><div id="summaryForm:j_idt281" class="ui-dialog ui-widget ui-widget-content ui-corner-all ui-shadow ui-hidden-container" role="dialog" aria-labelledby="summaryForm:j_idt281_title" aria-hidden="true" style="width: auto; height: auto;"><div class="ui-dialog-content ui-widget-content" style="height: auto;"><img id="summaryForm:j_idt282" src="/sfa/static-web/images/activity_indicator.gif?pfdrid_c=true" alt=""></div></div><input type="hidden" name="javax.faces.ViewState" id="javax.faces.ViewState" value="-7041145931021539794:-5868111386176825346" autocomplete="off">
+</form>
+					
+				
+					<script type="text/javascript"> 
+						/* <![CDATA[ */ 
+						function start() {  
+						    PF('statusDialog').show();  
+						}
+						  
+						function stop() {  
+						    PF('statusDialog').hide();  
+						}
+						
+						function toggleAllCheckboxes(parentFormId, checked){
+							$('input:checkbox[id*=' + parentFormId + '_]').prop('checked', checked);
+						}
+
+						function selectCurrentVersionCheckboxes(parentFormId){
+							$('input:checkbox[id^=currentVersion_' + parentFormId + '_]').prop('checked', true);
+						}
+
+						function gatherSelectedAttachments() {
+							var form = document.getElementById('summaryForm');
+							var attachmentIds = document.getElementById('summaryForm:selectedAttachmentIds');
+							var work = "";
+							var count = $('input:checkbox[id$=_selected]:checked').length;
+							$('input:checkbox[id$=_selected]:checked').each(function(index) {
+								work += $(this).val();
+								if(index < count - 1){
+									work += ",";
+								}
+							});
+							attachmentIds.value = work;
+						} 
+						/* ]]> */
+			        </script></div></div>
+					</div>
+				</div>
+			</div>
+		</div>		
+		<div class="row help-global">
+			<div class="container sfa-help">
+				<div class="col col-sm-3 clearfix">
+					<span><b>SERFF Filing Access Help Desk</b></span><br>
+					<span class="smallText">(816) 783-8500</span><br>
+					<span class="smallText"><a href="mailto:sfahelp@naic.org">sfahelp@naic.org</a></span>
+				</div>
+				<div class="col col-sm-offset-2 col-sm-1 text-left">
+					<span><b>Related Sites</b></span><br>
+					<span class="smallText"><a href="https://www.naic.org" target="_blank">www.naic.org</a></span><br>
+					<span class="smallText"><a href="https://www.serff.com" target="_blank">www.serff.com</a></span>
+				</div>
+			</div>	
+		</div>
+		<div class="footer-global">
+				<div class="footer-contact clearfix">
+					<div class="container">
+						<div class="col col-sm-6 clearfix">
+							<img class="footer-logo-naic" src="/sfa/static-web/images/naicLogo-footer.png" alt="NAIC Logo">
+							<div class="contactBlock">
+								<span><b>NAIC Central Office</b></span>
+								<span>1100 Walnut St.</span>
+								<span>Suite 1500</span>
+								<span>Kansas City, MO 64108</span>
+							</div>
+							<div class="contactBlock">
+								<span><b>Phone:</b> (816) 842-3600</span>
+								<span><b>Fax:</b> (816) 783-8175</span>
+								<span>8 a.m. to 5 p.m. (CST)</span>
+								<span>Monday - Friday</span>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="footer-copyright">
+					<div class="container">
+						<span>Copyright © 2017 National Association of Insurance Commissioners. All Rights Reserved.</span>
+					</div>
+				</div>
+			</div>
+
+<div id="textarea_simulator" style="position: absolute; top: 0px; left: 0px; visibility: hidden;"></div><div class="ui-dialog-docking-zone"></div></body></html>

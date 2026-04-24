@@ -1,0 +1,243 @@
+  (rate_changes.xlsx locked — falling back to rate_changes.csv)
+id_final.xlsx Idaho rows:      231
+rate_changes.* Idaho serffs:   3
+Target-group + target-TOI rows:49
+PDF target-carrier filings:    25
+
+==============================================================================
+BUCKET 1 (GREEN): IN BOTH  —  6 of 25
+==============================================================================
+
+  [Allstate] Allstate North American Insurance Company
+    our serff=ALSE-134638998  disp=2025-09-18  sub=2025-08-26
+    pdf eff=09/23/25  pdf_impact=-3.900  pdf_ind=  pdf_ph=6146
+    [no rate_changes row — cannot compare values]
+
+  [Allstate] Allstate North American Insurance Company
+    our serff=ALSE-134777653  disp=2026-01-12  sub=2025-12-18
+    pdf eff=02/10/26  pdf_impact=  pdf_ind=  pdf_ph=0
+    [no rate_changes row — cannot compare values]
+
+  [Allstate] Allstate Fire and Casualty Insurance Company
+    our serff=ALSE-134545039  disp=2025-05-27  sub=2025-05-23
+    pdf eff=06/23/25  pdf_impact=6.000  pdf_ind=6.000  pdf_ph=8410
+    [no rate_changes row — cannot compare values]
+
+  [Allstate] Allstate Fire and Casualty Insurance Company
+    our serff=ALSE-134490732  disp=2025-05-08  sub=2025-04-29
+    pdf eff=05/19/25  pdf_impact=0.000  pdf_ind=0.000  pdf_ph=0
+    [no rate_changes row — cannot compare values]
+
+  [Allstate] Allstate North American Insurance Company
+    our serff=ALSE-134447963  disp=2025-03-06  sub=2025-03-05
+    pdf eff=07/08/25  pdf_impact=1.000  pdf_ind=  pdf_ph=158
+    [no rate_changes row — cannot compare values]
+
+  [Liberty Mutual] Liberty Mutual Insurance Company
+    our serff=LBPM-134557139  disp=2025-06-05  sub=2025-06-04
+    pdf eff=07/21/25  pdf_impact=0.000  pdf_ind=0.000  pdf_ph=0
+    [no rate_changes row — cannot compare values]
+
+==============================================================================
+BUCKET 2 (RED): IN PDF BUT NOT OURS  —  19
+==============================================================================
+
+  [GEICO/Berkshire] GEICO Casualty Company
+    pdf eff=04/03/26  indicated=-12.400%  impact=-7.500%  policyholders=9434  (p1)
+    Reason: we have 1 rows for this company but none within 270d before eff=04/03/26:
+      GECC-134364811  disp=2025-02-18  sub=2025-02-06
+
+  [GEICO/Berkshire] GEICO Marine Insurance Company
+    pdf eff=04/03/26  indicated=-11.900%  impact=-7.500%  policyholders=1447  (p2)
+    Reason: we have 1 rows for this company but none within 270d before eff=04/03/26:
+      GECC-134364765  disp=2025-02-18  sub=2025-02-06
+
+  [State Farm] State Farm Mutual Automobile Insurance Company
+    pdf eff=01/02/26  indicated=-2.600%  impact=-9.700%  policyholders=360274  (p2)
+    Reason: we have NO Idaho rows for this company (target TOIs).
+
+  [State Farm] State Farm Fire and Casualty Company
+    pdf eff=01/02/26  indicated=15.900%  impact=-2.100%  policyholders=20679  (p3)
+    Reason: we have 3 rows for this company but none within 270d before eff=01/02/26:
+      SFMA-134533696  disp=2026-03-25  sub=2026-03-24
+      SFMA-134872376  disp=None  sub=2026-03-13
+      SFMA-134424081  disp=2025-02-20  sub=2025-02-19
+
+  [State Farm] MGA Insurance Company, Inc.
+    pdf eff=01/23/26  indicated=3.700%  impact=-0.100%  policyholders=2534  (p6)
+    Reason: we have NO Idaho rows for this company (target TOIs).
+
+  [Liberty Mutual] American Economy Insurance Company
+    pdf eff=03/21/26  indicated=-2.200%  impact=0.000%  policyholders=21727  (p5)
+    Reason: we have NO Idaho rows for this company (target TOIs).
+
+  [Allstate] Integon National Insurance Company
+    pdf eff=11/03/25  indicated=0.000%  impact=-9.600%  policyholders=61  (p16)
+    Reason: we have NO Idaho rows for this company (target TOIs).
+
+  [Travelers] The Standard Fire Insurance Company
+    pdf eff=09/26/25  indicated=-1.800%  impact=-1.600%  policyholders=17646  (p17)
+    Reason: we have NO Idaho rows for this company (target TOIs).
+
+  [Travelers] The Standard Fire Insurance Company
+    pdf eff=11/16/25  indicated=%  impact=0.000%  policyholders=17676  (p20)
+    Reason: we have NO Idaho rows for this company (target TOIs).
+
+  [Allstate] Allstate Indemnity Company
+    pdf eff=09/29/25  indicated=0.000%  impact=0.000%  policyholders=0  (p21)
+    Reason: we have 6 rows for this company but none within 270d before eff=09/29/25:
+      ALSE-134817781  disp=2026-02-05  sub=2026-01-29
+      ALSE-134778416  disp=2026-02-02  sub=2026-01-28
+      ALSE-134778414  disp=2026-02-02  sub=2026-01-28
+      ALSE-134737223  disp=2025-11-13  sub=2025-11-12
+
+  [Allstate] Allstate Insurance Company
+    pdf eff=09/29/25  indicated=0.000%  impact=0.000%  policyholders=0  (p21)
+    Reason: we have 4 rows for this company but none within 270d before eff=09/29/25:
+      ALSE-134724096  disp=2025-12-03  sub=2025-10-31
+      ALSE-134813879  disp=2026-02-05  sub=2026-01-27
+      ALSE-134778406  disp=2026-02-02  sub=2026-01-28
+      ALSE-134778366  disp=2026-01-29  sub=2026-01-28
+
+  [Allstate] Allstate Property and Casualty Insurance Company
+    pdf eff=09/29/25  indicated=0.000%  impact=0.000%  policyholders=0  (p21)
+    Reason: we have 4 rows for this company but none within 270d before eff=09/29/25:
+      ALSE-134810468  disp=2026-02-05  sub=2026-01-22
+      ALSE-134778434  disp=2026-02-02  sub=2026-01-28
+      ALSE-134778394  disp=2026-01-29  sub=2026-01-28
+      ALSE-134778389  disp=2026-01-29  sub=2026-01-28
+
+  [Allstate] Integon Indemnity Corporation
+    pdf eff=05/29/25  indicated=7.700%  impact=0.500%  policyholders=5555  (p23)
+    Reason: we have NO Idaho rows for this company (target TOIs).
+
+  [Allstate] Encompass Indemnity Company
+    pdf eff=09/01/25  indicated=10.400%  impact=10.400%  policyholders=785  (p24)
+    Reason: we have NO Idaho rows for this company (target TOIs).
+
+  [Allstate] Esurance Property and Casualty Insurance Company
+    pdf eff=06/05/25  indicated=0.000%  impact=0.000%  policyholders=0  (p31)
+    Reason: we have NO Idaho rows for this company (target TOIs).
+
+  [Allstate] Encompass Indemnity Company
+    pdf eff=06/23/25  indicated=0.000%  impact=0.000%  policyholders=0  (p34)
+    Reason: we have NO Idaho rows for this company (target TOIs).
+
+  [Allstate] Integon National Insurance Company
+    pdf eff=04/28/25  indicated=0.000%  impact=0.000%  policyholders=12  (p34)
+    Reason: we have NO Idaho rows for this company (target TOIs).
+
+  [Liberty Mutual] Safeco Insurance Company of Illinois
+    pdf eff=05/12/25  indicated=-12.700%  impact=-3.000%  policyholders=48818  (p39)
+    Reason: we have NO Idaho rows for this company (target TOIs).
+
+  [Liberty Mutual] Liberty Mutual Personal Insurance Company
+    pdf eff=07/21/25  indicated=1.300%  impact=0.000%  policyholders=2904  (p40)
+    Reason: we have NO Idaho rows for this company (target TOIs).
+
+==============================================================================
+BUCKET 3 (YELLOW): IN OURS BUT NOT PDF  —  43
+(target TOIs only: 19.x PPA, 04.x Homeowners, 03.x Farmowners)
+==============================================================================
+
+  [Allstate] — 32 extra
+    ALSE-134400261        disp=2025-02-13  Allstate Fire and Casualty Insurance Compa  toi=19.0 Personal Auto    status=FILED
+    ALSE-134778388        disp=2026-01-29  Allstate Fire and Casualty Insurance Compa  toi=19.0 Personal Auto    status=FILED
+    ALSE-134737223        disp=2025-11-13  Allstate Indemnity Company                  toi=04.0 Homeowners       status=FILED
+    ALSE-134778416        disp=2026-02-02  Allstate Indemnity Company                  toi=04.0 Homeowners       status=FILED
+    ALSE-134778414        disp=2026-02-02  Allstate Indemnity Company                  toi=04.0 Homeowners       status=FILED
+    ALSE-134778398        disp=2026-01-29  Allstate Indemnity Company                  toi=19.0 Personal Auto    status=FILED
+    ALSE-134778412        disp=2026-01-29  Allstate Indemnity Company                  toi=19.0 Personal Auto    status=FILED
+    ALSE-134817781        disp=2026-02-05  Allstate Indemnity Company                  toi=04.0 Homeowners       status=WITHDRAWN
+    ALSE-134724096        disp=2025-12-03  Allstate Insurance Company                  toi=04.0 Homeowners       status=FILED
+    ALSE-134813879        disp=2026-02-05  Allstate Insurance Company                  toi=04.0 Homeowners       status=WITHDRAWN
+    ALSE-134778406        disp=2026-02-02  Allstate Insurance Company                  toi=04.0 Homeowners       status=FILED
+    ALSE-134778366        disp=2026-01-29  Allstate Insurance Company                  toi=19.0 Personal Auto    status=FILED
+    ALSE-134644319        disp=2025-08-28  Allstate North American Insurance Company   toi=19.0 Personal Auto    status=FILED
+    ALSE-134596718        disp=2025-08-25  Allstate North American Insurance Company   toi=04.0 Homeowners       status=DISAPPROVED
+    ALSE-134599039        disp=2025-08-25  Allstate North American Insurance Company   toi=04.0 Homeowners       status=DISAPPROVED
+    ALSE-134646200        disp=2025-08-26  Allstate North American Insurance Company   toi=19.0 Personal Auto    status=DISAPPROVED
+    ALSE-134651294        disp=2025-08-27  Allstate North American Insurance Company   toi=19.0 Personal Auto    status=FILED
+    ALSE-134651080        disp=2025-08-27  Allstate North American Insurance Company   toi=19.0 Personal Auto    status=FILED
+    ALSE-134651548        disp=2025-09-09  Allstate North American Insurance Company   toi=04.0 Homeowners       status=FILED
+    ALSE-134651553        disp=2025-09-09  Allstate North American Insurance Company   toi=04.0 Homeowners       status=FILED
+    ALSE-134731488        disp=2025-11-07  Allstate North American Insurance Company   toi=04.0 Homeowners       status=FILED
+    ALSE-134737213        disp=2025-12-05  Allstate North American Insurance Company   toi=04.0 Homeowners       status=FILED
+    ALSE-133671711        disp=2025-12-05  Allstate North American Insurance Company   toi=04.0 Homeowners       status=FILED
+    ALSE-134865728        disp=2026-03-09  Allstate North American Insurance Company   toi=04.0 Homeowners       status=FILED
+    ALSE-134897436        disp=2026-04-02  Allstate North American Insurance Company   toi=19.0 Personal Auto    status=FILED
+    ALSE-134909157        disp=2026-04-15  Allstate North American Insurance Company   toi=19.0 Personal Auto    status=FILED
+    ALSE-134810468        disp=2026-02-05  Allstate Property and Casualty Insurance C  toi=04.0 Homeowners       status=WITHDRAWN
+    ALSE-134778434        disp=2026-02-02  Allstate Property and Casualty Insurance C  toi=04.0 Homeowners       status=FILED
+    ALSE-134778394        disp=2026-01-29  Allstate Property and Casualty Insurance C  toi=19.0 Personal Auto    status=FILED
+    ALSE-134778389        disp=2026-01-29  Allstate Property and Casualty Insurance C  toi=19.0 Personal Auto    status=FILED
+    ALSE-134780087        disp=2026-02-05  Allstate Vehicle and Property Insurance Co  toi=04.0 Homeowners       status=WITHDRAWN
+    ALSE-134778421        disp=2026-02-02  Allstate Vehicle and Property Insurance Co  toi=04.0 Homeowners       status=FILED
+
+  [GEICO] — 2 extra
+    GECC-134364811        disp=2025-02-18  GEICO Casualty Company                      toi=19.0 Personal Auto    status=FILED
+    GECC-134364765        disp=2025-02-18  GEICO Marine Insurance Company              toi=19.0 Personal Auto    status=FILED
+
+  [Liberty Mutual] — 1 extra
+    LBPM-134407685        disp=2025-03-21  Liberty Mutual Fire Insurance Company       toi=04.0 Homeowners       status=FILED
+
+  [State Farm] — 5 extra
+    SFCI-134375544        disp=2025-02-21  State Farm Classic Insurance Company        toi=19.0 Personal Auto    status=FILED
+    SFCI-134375545        disp=2025-02-21  State Farm Classic Insurance Company        toi=19.0 Personal Auto    status=FILED
+    SFMA-134424081        disp=2025-02-20  State Farm Fire and Casualty Company        toi=04.0 Homeowners       status=FILED
+    SFMA-134872376        disp=None  State Farm Fire and Casualty Company        toi=04.0 Homeowners       status=PENDING
+    SFMA-134533696        disp=2026-03-25  State Farm Fire and Casualty Company        toi=03.0 Personal Farmow  status=DISAPPROVED
+
+  [Travelers] — 3 extra
+    TRVD-G134477340       disp=2025-04-01  Travelers Commercial Insurance Company      toi=19.0 Personal Auto    status=FILED
+    TRVD-G134605035       disp=2025-07-22  Travelers Commercial Insurance Company      toi=04.0 Homeowners       status=FILED
+    TRVD-G134677302       disp=2025-09-25  Travelers Commercial Insurance Company      toi=19.0 Personal Auto    status=FILED
+
+==============================================================================
+SIDE-BY-SIDE COMPANY COUNTS
+==============================================================================
+  carrier          company                                                  PDF  ours
+  Allstate         Allstate Fire and Casualty Insurance Company               2     4  <-- ours > PDF
+  Allstate         Allstate Indemnity Company                                 1     6  <-- ours > PDF
+  Allstate         Allstate Insurance Company                                 1     4  <-- ours > PDF
+  Allstate         Allstate North American Insurance Company                  3    17  <-- ours > PDF
+  Allstate         Allstate Property and Casualty Insurance Company           1     4  <-- ours > PDF
+  Allstate         Allstate Vehicle and Property Insurance Company            0     2  <-- ours > PDF
+  Allstate         Encompass Indemnity Company                                2     0  <-- PDF > ours
+  Allstate         Esurance Property and Casualty Insurance Company           1     0  <-- PDF > ours
+  Allstate         Integon Indemnity Corporation                              1     0  <-- PDF > ours
+  Allstate         Integon National Insurance Company                         2     0  <-- PDF > ours
+  GEICO            GEICO Casualty Company                                     0     1  <-- ours > PDF
+  GEICO            GEICO Marine Insurance Company                             0     1  <-- ours > PDF
+  GEICO/Berkshire  GEICO Casualty Company                                     1     0  <-- PDF > ours
+  GEICO/Berkshire  GEICO Marine Insurance Company                             1     0  <-- PDF > ours
+  Liberty Mutual   American Economy Insurance Company                         1     0  <-- PDF > ours
+  Liberty Mutual   Liberty Mutual Fire Insurance Company                      0     1  <-- ours > PDF
+  Liberty Mutual   Liberty Mutual Insurance Company                           1     1
+  Liberty Mutual   Liberty Mutual Personal Insurance Company                  1     0  <-- PDF > ours
+  Liberty Mutual   Safeco Insurance Company of Illinois                       1     0  <-- PDF > ours
+  State Farm       MGA Insurance Company, Inc.                                1     0  <-- PDF > ours
+  State Farm       State Farm Classic Insurance Company                       0     2  <-- ours > PDF
+  State Farm       State Farm Fire and Casualty Company                       1     3  <-- ours > PDF
+  State Farm       State Farm Mutual Automobile Insurance Company             1     0  <-- PDF > ours
+  Travelers        The Standard Fire Insurance Company                        2     0  <-- PDF > ours
+  Travelers        Travelers Commercial Insurance Company                     0     3  <-- ours > PDF
+
+==============================================================================
+SUMMARY
+==============================================================================
+  PDF target-carrier filings (Idaho PPA):     25
+    Matched in our dataset:                   6
+    Unmatched (potential misses):             19
+  Rows in ours (target TOIs) not in PDF:      43
+  Matched with rate_changes comparison data:  0
+  Value mismatches flagged:                   0
+
+  CAVEATS:
+    * PDF SERFFs are masked as *****, so matching is by
+      carrier_group + exact company_name + (disp_date <= eff_date <= disp+270d).
+    * id_final.xlsx rate-value columns are empty for Idaho, so value comparison
+      only happens for the subset of rows present in rate_changes.xlsx.
+    * PDF report covers PPA only for Idaho — no Homeowners or Progressive.
+    * Bucket 3 is restricted to target TOIs (19.x PPA, 04.x HO, 03.x Farmowners)
+      so out-of-scope lines (Other Liability, Workers Comp, etc.) aren't listed.
