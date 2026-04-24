@@ -41,8 +41,13 @@ def main() -> int:
         pairs = [(args.state, args.company)]
         out_name = f"{_slug(args.state)}_{_slug(args.company)}_search.xlsx"
 
-    filings = search_all(pairs)
     out = Path(OUTPUT_DIR) / out_name
+
+    def _checkpoint(so_far):
+        write_excel(so_far, out)
+        print(f"    [checkpoint] saved {len(so_far)} filings -> {out}", flush=True)
+
+    filings = search_all(pairs, checkpoint_cb=_checkpoint)
     write_excel(filings, out)
 
     print(f"\n=== Summary ===")

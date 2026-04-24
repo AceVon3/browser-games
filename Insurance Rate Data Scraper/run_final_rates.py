@@ -157,6 +157,26 @@ def download_all_pdfs(state: str, targets: list[Target]) -> dict[str, str]:
         browser = p.chromium.launch(headless=HEADLESS)
         ctx = browser.new_context(user_agent=USER_AGENT, accept_downloads=True)
         page = ctx.new_page()
+
+        def _refresh_context():
+            nonlocal ctx, page
+            try:
+                ctx.close()
+            except Exception:
+                pass
+            ctx = browser.new_context(user_agent=USER_AGENT, accept_downloads=True)
+            page = ctx.new_page()
+
+        def _submit_with_retry(st: str, term: str) -> bool:
+            for attempt in range(3):
+                try:
+                    if _submit_search(page, st, term):
+                        return True
+                except Exception as e:
+                    print(f"    [retry {attempt+1}/3] submit_search {term!r}: {e}", flush=True)
+                _refresh_context()
+            return False
+
         for grp, items in by_group.items():
             uncached = []
             for t in items:
@@ -174,8 +194,8 @@ def download_all_pdfs(state: str, targets: list[Target]) -> dict[str, str]:
                 if not remaining:
                     break
                 print(f"  [{grp}] search={search_term!r}, attempting {len(remaining)} filing(s)", flush=True)
-                if not _submit_search(page, state, search_term):
-                    print(f"  [{grp}] search submission failed for {search_term!r}", flush=True)
+                if not _submit_with_retry(state, search_term):
+                    print(f"  [{grp}] search submission failed for {search_term!r} after retries", flush=True)
                     continue
                 _set_rows_per_page_100(page)
                 still_remaining: list[Target] = []
@@ -196,7 +216,7 @@ def download_all_pdfs(state: str, targets: list[Target]) -> dict[str, str]:
                     statuses[t.filing_id] = "ok" if pdf else "fail:download"
                     print(f"    [{idx}/{len(remaining)}] {t.tracking}: {statuses[t.filing_id]}", flush=True)
                     if not page.locator(".ui-paginator-next").count():
-                        _submit_search(page, state, search_term); _set_rows_per_page_100(page)
+                        _submit_with_retry(state, search_term); _set_rows_per_page_100(page)
                 remaining = still_remaining
             for t in remaining:
                 statuses[t.filing_id] = "fail:row_not_found"

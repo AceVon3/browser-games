@@ -610,6 +610,25 @@ _FS_RATE_ROW_RE_C = re.compile(
     r"(?P<imp>-?\d+(?:\.\d+)?)%\s+"
     r"%\s+%\s*$"
 )
+# Pattern D: blank indicated + blank max/min, has prem_chg + ph + prem_for
+# Seen in OR State Farm filings: "name % imp% $prem_chg ph $prem_for % %"
+_FS_RATE_ROW_RE_D = re.compile(
+    r"^(?P<name>.+?)\s+%\s+"
+    r"(?P<imp>-?\d+(?:\.\d+)?)%\s+"
+    r"\$\(?(?P<prem_chg>-?[\d,]+)\)?\s+"
+    r"(?P<ph>[\d,]+)\s+"
+    r"\$(?P<prem_for>[\d,]+)\s+"
+    r"%\s+%\s*$"
+)
+# Pattern E: blank indicated + blank max/min + omitted prem_chg (premium-neutral)
+# Seen in OR State Farm 0% filings: "name % 0.000% ph $prem_for % %"
+_FS_RATE_ROW_RE_E = re.compile(
+    r"^(?P<name>.+?)\s+%\s+"
+    r"(?P<imp>-?\d+(?:\.\d+)?)%\s+"
+    r"(?P<ph>[\d,]+)\s+"
+    r"\$(?P<prem_for>[\d,]+)\s+"
+    r"%\s+%\s*$"
+)
 _FS_MULTI_INDICATED_RE = re.compile(r"Overall Percentage Rate Indicated For This Filing\s+(-?\d+(?:\.\d+)?)%")
 _FS_MULTI_IMPACT_RE    = re.compile(r"Overall Percentage Rate Impact For This Filing\s+(-?\d+(?:\.\d+)?)%")
 _FS_MULTI_PREMCHG_RE   = re.compile(r"Effect of Rate Filing[-\s]+Written Premium Change For This Program\s+\$\(?(-?[\d,]+)\)?")
@@ -684,6 +703,8 @@ def parse_filing_summary_pdf(pdf_path: Path, tracking_number: str = "") -> Filin
         ln = lines[i].strip()
         m = _FS_RATE_ROW_RE_A.match(ln)
         if not m: m = _FS_RATE_ROW_RE_B.match(ln)
+        if not m: m = _FS_RATE_ROW_RE_D.match(ln)
+        if not m: m = _FS_RATE_ROW_RE_E.match(ln)
         if not m: m = _FS_RATE_ROW_RE_C.match(ln)
         if not m:
             i += 1; continue

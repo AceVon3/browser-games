@@ -323,17 +323,32 @@ def search_all(
     *,
     headless: bool = HEADLESS,
     delay_s: float = REQUEST_DELAY,
+    checkpoint_cb=None,
 ) -> list[Filing]:
-    """Run search_company for each (state, company) pair with polite delays."""
+    """Run search_company for each (state, company) pair with polite delays.
+
+    `checkpoint_cb(all_filings_so_far)` is invoked after each (state, company)
+    pair completes — lets the caller persist partial results so a later crash
+    doesn't wipe an hour of search work.
+    """
     all_filings: list[Filing] = []
     with sync_playwright() as pw:
         browser = pw.chromium.launch(headless=headless)
         try:
             for state, company in state_company_pairs:
                 print(f"[search] {state} / {company} ...", flush=True)
-                results = search_company(browser, state, company)
+                try:
+                    results = search_company(browser, state, company)
+                except Exception as e:
+                    print(f"  ! {state}/{company} failed: {e}", flush=True)
+                    results = []
                 print(f"  -> {len(results)} rows", flush=True)
                 all_filings.extend(results)
+                if checkpoint_cb is not None:
+                    try:
+                        checkpoint_cb(all_filings)
+                    except Exception as e:
+                        print(f"  ! checkpoint save failed: {e}", flush=True)
                 time.sleep(delay_s)
         finally:
             browser.close()

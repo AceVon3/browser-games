@@ -1,6 +1,6 @@
-"""Build the canonical three-state final-rates deliverable.
+"""Build the canonical multi-state final-rates deliverable.
 
-Concatenates ID + WA + CO per-state workbooks into:
+Concatenates ID + WA + CO + OR per-state workbooks into:
   - output/all_states_final_rates.xlsx  (rate_filings sheet + README sheet)
   - output/all_states_final_rates.csv   (rate_filings only, for quick load)
 """
@@ -9,7 +9,7 @@ import csv
 import openpyxl
 from openpyxl.styles import Font, Alignment
 
-STATES = ["ID", "WA", "CO"]
+STATES = ["ID", "WA", "CO", "OR"]
 OUT_XLSX = Path("output/all_states_final_rates.xlsx")
 OUT_CSV = Path("output/all_states_final_rates.csv")
 
@@ -18,7 +18,7 @@ README_LINES: list[tuple[str, str]] = [
     ("", ""),
     ("Source", "SERFF Filing Access (filingaccess.serff.com), system-generated Filing Summary PDF"),
     ("Pipeline", "Public search -> minimal zip download -> {tracking}.pdf -> Disposition / Company Rate Information table"),
-    ("States", "Idaho (ID), Washington (WA), Colorado (CO)"),
+    ("States", "Idaho (ID), Washington (WA), Colorado (CO), Oregon (OR)"),
     ("Lines", "19.0 Personal Auto, 04.0 Homeowners, 03.0 Personal Farmowners (NAIC TOI codes)"),
     ("Carriers", "State Farm, GEICO, Progressive, Allstate, Travelers, Liberty Mutual (and named subsidiaries); plus Safeco (Liberty Mutual independent-agent brand) and Encompass (Allstate independent-agent brand) — searched separately because each files under its own brand on SERFF"),
     ("Filing types kept", "Rate, Rate/Rule (Form-only and Rule-only filings excluded)"),
@@ -51,12 +51,12 @@ README_LINES: list[tuple[str, str]] = [
     ("Date range", "Filings present in SERFF Public Access at run time (no explicit date filter)"),
     ("Carrier scope", "Only the six listed national groups + their named subsidiaries"),
     ("Line scope", "Personal Auto, Homeowners, Farmowners only"),
-    ("State scope", "ID, WA, CO only"),
+    ("State scope", "ID, WA, CO, OR only"),
     ("Filer flag", "Rows excluded when filer set 'Rate data does NOT apply to filing.'; this flag is taken at face value"),
     ("PDF parsing", "Three Disposition row patterns supported (full / blank-indicated / sparse). Layouts outside these patterns may be missed"),
     ("", ""),
     ("RECOMMENDED USE", ""),
-    ("", "Comparative analysis of approved/filed rate changes across ID/WA/CO for the named carriers"),
+    ("", "Comparative analysis of approved/filed rate changes across ID/WA/CO/OR for the named carriers"),
     ("", "Cross-reference to AM Best Disposition Page Data using serff_tracking_number"),
     ("", "Not a substitute for full-state market analysis — scope is bounded by the carrier and line filters above"),
 ]
